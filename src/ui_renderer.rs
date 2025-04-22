@@ -1,3 +1,4 @@
+use std::cell::OnceCell;
 use std::sync::OnceLock;
 use lazy_static::lazy_static;
 use sdl2::EventPump;
@@ -10,6 +11,7 @@ use sdl2::surface::Surface;
 use sdl2::ttf::{Sdl2TtfContext};
 use sdl2::video::WindowContext;
 use crate::errors::{UnyoError, UnyoResult};
+use crate::ui_renderer::AvailableFonts::JetbrainsMono;
 
 const _TEXT_SIZE_CONST: f64 = 32_f64 / (1080 * 40) as f64;
 
@@ -23,7 +25,7 @@ pub fn get_custom_font_size(s: f64) -> u16 {
 pub enum FontSize {
     SuperLarge = 32 * 10,
     Large = 16 * 10,
-    Medium = 5 * 10,
+    MediumL = 5 * 10,
     MediumM = 4 * 10,
     MediumS = 3 * 10,
     Small = 2 * 10
@@ -70,7 +72,7 @@ impl USize {
     pub fn scale_2(&self, s: f32) -> USize {
         USize((self.0.0, (self.0.1 as f32 * s) as u32))
     }
-    
+
     pub fn one(&self) -> u32 {
         self.0.0
     }
@@ -129,7 +131,7 @@ impl<'a> Font<'a> {
     pub fn load(font: AvailableFonts, size: u16) -> Self {
         Self::load_path(font.to_path(), size)
     }
-    
+
     pub fn char_dim(&self) -> USize {
         self.0.size_of_char('A').unwrap().into()
     }
@@ -144,6 +146,44 @@ impl<'a> Font<'a> {
 impl<'a> From<sdl2::ttf::Font<'a, 'a>> for Font<'a> {
     fn from(value: sdl2::ttf::Font<'a, 'a>) -> Self {
         Font::new(value)
+    }
+}
+
+pub struct FontOwner<'a> {
+    pub jb_medium_l: Font<'a>,
+    pub jb_medium_m: Font<'a>,
+    pub jb_medium_s: Font<'a>,
+    pub jb_large: Font<'a>
+}
+
+impl<'a> FontOwner<'a> {
+    pub fn new() -> Self {
+        let jb_medium_l = Font::load(JetbrainsMono, FontSize::MediumL.to_real_size());
+        let jb_medium_m = Font::load(JetbrainsMono, FontSize::MediumM.to_real_size());
+        let jb_medium_s = Font::load(JetbrainsMono, FontSize::MediumS.to_real_size());
+
+        let jb_large = Font::load(JetbrainsMono, FontSize::MediumL.to_real_size());
+        
+        Self {jb_medium_l, jb_medium_m, jb_medium_s, jb_large}
+    }
+}
+
+pub struct UIHelper<'a> {
+    pub font_owner: FontOwner<'a>,
+    pub texture_creator: &'a TextureCreator<WindowContext>
+}
+
+impl<'a> UIHelper<'a> {
+    pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Self {
+        Self {font_owner: FontOwner::new(), texture_creator}
+    }
+    
+    pub fn texture_from_surface(&self, surface: Surface) -> Texture {
+        self.texture_creator.create_texture_from_surface(surface).unwrap()
+    }
+    
+    pub fn image_texture(&self, path: &str) -> Texture {
+        self.texture_creator.load_texture(path).unwrap()
     }
 }
 
@@ -194,16 +234,16 @@ impl UIContext {
         self.canvas.fill_rect(rect).expect("Failed to draw rectangle")
     }
 
-    pub fn draw_text(&mut self, x: i32, y: i32, font: &Font, text: &str, color: Color, texture_creator: &TextureCreator<WindowContext>) -> (i32, i32) {
+    pub fn draw_text(&mut self, x: i32, y: i32, font: &Font, text: &str, color: Color, uihelper: &UIHelper) -> (i32, i32) {
         let (surface, size) = font.write_text(text, color);
         let size = size.into();
-        let texture = texture_creator.create_texture_from_surface(surface).unwrap();
+        let texture = uihelper.texture_from_surface(surface);
         self.draw_texture3(&texture, x, y, size);
         (x + size.0 as i32, y)
     }
-    
-    pub fn draw_image(&mut self, x: i32, y: i32, size: (u32, u32), path: &str, texture_creator: &TextureCreator<WindowContext>) -> (i32, i32) {
-        let texture = texture_creator.load_texture(path).expect("Failed to load image");
+
+    pub fn draw_image(&mut self, x: i32, y: i32, size: (u32, u32), path: &str, uihelper: &UIHelper) -> (i32, i32) {
+        let texture = uihelper.image_texture(path);
         self.draw_texture3(&texture, x, y, size);
         (x + size.0 as i32, y)
     }
@@ -231,13 +271,13 @@ impl UIContext {
         self.canvas.window().size()
     }
     
-    pub fn draw(&mut self, drawable: &impl Drawable, texture_creator: &TextureCreator<WindowContext>) {
-        drawable.draw(self, texture_creator)
+    pub fn draw(&mut self, drawable: &impl Drawable, uihelper: &UIHelper) {
+        drawable.draw(self, uihelper)
     }
 }
 
 pub trait Drawable {
-    fn draw<'a>(&self, ctx: &mut UIContext, texture_creator: &'a TextureCreator<WindowContext>);
+    fn draw(&self, ctx: &mut UIContext, texture_creator: &UIHelper);
     fn get_pos(&self) -> Rect;
 }
 

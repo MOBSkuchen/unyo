@@ -50,7 +50,7 @@ impl WeatherInfo {
         city.remove(0);
         city.remove(city.len()-1);
         let mut is_day = false;
-        
+
         let current = {
             let current = head.get("current").unwrap().as_object().unwrap();
             let rain = current.get("rain").unwrap().as_f64().unwrap();

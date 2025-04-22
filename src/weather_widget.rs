@@ -4,8 +4,7 @@ use sdl2::render::TextureCreator;
 use sdl2::video::WindowContext;
 use crate::api::WeatherInfo;
 use crate::display::{TEXT_COLOR, WIDGET_COLOR};
-use crate::ui_renderer::{Drawable, Font, FontSize, UIContext, EDGE_PADDING};
-use crate::ui_renderer::AvailableFonts::JetbrainsMono;
+use crate::ui_renderer::{Drawable, UIContext, UIHelper, EDGE_PADDING};
 
 use chrono::{Datelike, Duration, Local, Timelike, Weekday};
 
@@ -108,21 +107,17 @@ impl WeatherWidget {
 }
 
 impl Drawable for WeatherWidget {
-    fn draw(&self, ctx: &mut UIContext, texture_creator: &TextureCreator<WindowContext>) {
-        let medium_s_jb = Font::load(JetbrainsMono, FontSize::MediumS.to_real_size());
-        let medium_m_jb = Font::load(JetbrainsMono, FontSize::MediumM.to_real_size());
-        let medium_jb = Font::load(JetbrainsMono, FontSize::Medium.to_real_size());
-
-        let medium_char_size = medium_jb.char_dim();
-        let medium_s_char_size = medium_s_jb.char_dim();
-        let medium_m_char_size = medium_m_jb.char_dim();
+    fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper) {
+        let medium_l_char_size = uihelper.font_owner.jb_medium_l.char_dim();
+        let medium_m_char_size = uihelper.font_owner.jb_medium_m.char_dim();
+        let medium_s_char_size = uihelper.font_owner.jb_medium_s.char_dim();
         
         ctx.draw_rect(self.position, WIDGET_COLOR);
-        let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &medium_jb, format!("WETTER (in {})", self.weather_info.city).as_str(), Color::GREY, texture_creator);
+        let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, format!("WETTER (in {})", self.weather_info.city).as_str(), Color::GREY, uihelper);
         
         let w_current_p = self.select_image_for_params(self.weather_info.current.1, Some(self.weather_info.current.2), None);
-        let (x, y) = ctx.draw_text(x + 3 * EDGE_PADDING(), y, &medium_jb, format!("Aktuell: {} °C", self.weather_info.current.0).as_str(), TEXT_COLOR, texture_creator);
-        ctx.draw_image(x + 5 * EDGE_PADDING(), y, medium_char_size.scale_1(2.5).into(), w_current_p.to_path(), texture_creator);
+        let (x, y) = ctx.draw_text(x + 3 * EDGE_PADDING(), y, &uihelper.font_owner.jb_medium_l, format!("Aktuell: {} °C", self.weather_info.current.0).as_str(), TEXT_COLOR, uihelper);
+        ctx.draw_image(x + 5 * EDGE_PADDING(), y, medium_l_char_size.scale_1(2.5).into(), w_current_p.to_path(), uihelper);
         
         let (mut x, mut y) = (self.position.x + EDGE_PADDING(), y + 25 * EDGE_PADDING());
         let day_img_size = medium_s_char_size.scale_1(3_f32).scale_2(1.8).into();
@@ -132,13 +127,13 @@ impl Drawable for WeatherWidget {
             
             let xp = x + EDGE_PADDING() * 8 * (day != 0) as i32;    // Bounding position for item
             
-            let rebound = ctx.draw_text(xp, y, &medium_m_jb, name.as_str(), TEXT_COLOR, texture_creator);
+            let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_l, name.as_str(), TEXT_COLOR, uihelper);
             x = rebound.0; y = rebound.1;
             
             let img = self.select_image_for_params(data.2, None, Some(data.3));
-            ctx.draw_image(x + 2 * EDGE_PADDING(), y + EDGE_PADDING(), day_img_size, img.to_path(), texture_creator);
+            ctx.draw_image(x + 2 * EDGE_PADDING(), y + EDGE_PADDING(), day_img_size, img.to_path(), uihelper);
 
-            ctx.draw_text(xp, y + EDGE_PADDING() +  medium_s_char_size.two() as i32, &medium_s_jb, data.0.to_string().as_str(), TEXT_COLOR, texture_creator);
+            ctx.draw_text(xp, y + EDGE_PADDING() +  medium_s_char_size.two() as i32, &uihelper.font_owner.jb_medium_l, data.0.to_string().as_str(), TEXT_COLOR, uihelper);
         }
         
         y = self.position.y + 10 * EDGE_PADDING();
@@ -151,13 +146,13 @@ impl Drawable for WeatherWidget {
 
             let xp = x + EDGE_PADDING() * 8 * (hour != 0) as i32;
 
-            let rebound = ctx.draw_text(xp, y, &medium_m_jb, name.as_str(), TEXT_COLOR, texture_creator);
+            let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_m, name.as_str(), TEXT_COLOR, uihelper);
             x = rebound.0 + 3 * EDGE_PADDING(); y = rebound.1;
 
-            ctx.draw_text(xp + (medium_m_char_size.one() / 2) as i32, y + medium_m_char_size.two() as i32, &medium_m_jb, data.0.to_string().as_str(), TEXT_COLOR, texture_creator);
+            ctx.draw_text(xp + (medium_m_char_size.one() / 2) as i32, y + medium_m_char_size.two() as i32, &uihelper.font_owner.jb_medium_m, data.0.to_string().as_str(), TEXT_COLOR, uihelper);
 
             let img = self.select_image_for_params(data.1, Some(data.2), None);
-            ctx.draw_image(xp + medium_m_char_size.one() as i32, y + 2 * medium_m_char_size.two() as i32, hour_img_size, img.to_path(), texture_creator);
+            ctx.draw_image(xp + medium_m_char_size.one() as i32, y + 2 * medium_m_char_size.two() as i32, hour_img_size, img.to_path(), uihelper);
 
             if hour >= 4 {
                 break

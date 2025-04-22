@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 use crate::api::WeatherInfo;
-use crate::ui_renderer::{init, surface_to_texture, AvailableFonts, Font, FontSize, UIContext};
+use crate::ui_renderer::{init, surface_to_texture, AvailableFonts, Font, FontSize, UIContext, UIHelper};
 
 pub const BACKGROUND_COLOR: Color = Color::RGB(35, 34, 34);
 pub const WIDGET_COLOR: Color = Color::RGB(58, 57, 57);
@@ -13,6 +13,7 @@ pub fn video_main() -> Result<(), String> {
     let (window, mut event_pump) = init()?;
     let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
     let texture_creator = canvas.texture_creator();
+    let uihelper = UIHelper::new(&texture_creator);
     
     let jetbrains = Font::load(AvailableFonts::JetbrainsMono, FontSize::SuperLarge.to_real_size());
     
@@ -41,7 +42,7 @@ pub fn video_main() -> Result<(), String> {
         let center = ui.center_rect(size.one(), size.two());
         ui.clear(BACKGROUND_COLOR);
         ui.draw_texture(texture, center);
-        ui.draw(&weather_widget, &texture_creator);
+        ui.draw(&weather_widget, &uihelper);
         ui.render();
         
         // Wait until next second
