@@ -1,4 +1,3 @@
-use std::cell::OnceCell;
 use std::sync::OnceLock;
 use lazy_static::lazy_static;
 use sdl2::EventPump;
@@ -11,7 +10,6 @@ use sdl2::surface::Surface;
 use sdl2::ttf::{Sdl2TtfContext};
 use sdl2::video::WindowContext;
 use crate::errors::{UnyoError, UnyoResult};
-use crate::ui_renderer::AvailableFonts::JetbrainsMono;
 
 const _TEXT_SIZE_CONST: f64 = 32_f64 / (1080 * 40) as f64;
 
@@ -38,11 +36,13 @@ impl From<FontSize> for f64 {
 }
 
 impl FontSize {
+    #[allow(clippy::wrong_self_convention)]
     pub fn to_real_size(self) -> u16 {
         get_custom_font_size(self.into())
     }
 }
 
+#[allow(non_snake_case)]
 pub fn EDGE_PADDING() -> i32 {
     *_EDGE_PADDING_GLOB.get().unwrap()
 }
@@ -158,11 +158,11 @@ pub struct FontOwner<'a> {
 
 impl<'a> FontOwner<'a> {
     pub fn new() -> Self {
-        let jb_medium_l = Font::load(JetbrainsMono, FontSize::MediumL.to_real_size());
-        let jb_medium_m = Font::load(JetbrainsMono, FontSize::MediumM.to_real_size());
-        let jb_medium_s = Font::load(JetbrainsMono, FontSize::MediumS.to_real_size());
+        let jb_medium_l = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumL.to_real_size());
+        let jb_medium_m = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumM.to_real_size());
+        let jb_medium_s = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumS.to_real_size());
 
-        let jb_large = Font::load(JetbrainsMono, FontSize::MediumL.to_real_size());
+        let jb_large = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumL.to_real_size());
         
         Self {jb_medium_l, jb_medium_m, jb_medium_s, jb_large}
     }
@@ -192,8 +192,8 @@ pub struct UIContext {
 }
 
 impl UIContext {
-    pub fn new(canvas: WindowCanvas) -> Result<Self, UnyoError> {
-        Ok(Self { canvas })
+    pub fn new(canvas: WindowCanvas) -> UnyoResult<Self> {
+        Ok(Self { canvas})
     }
     
     pub fn draw_texture(&mut self, texture: Texture, rect: Rect) {
@@ -278,7 +278,6 @@ impl UIContext {
 
 pub trait Drawable {
     fn draw(&self, ctx: &mut UIContext, texture_creator: &UIHelper);
-    fn get_pos(&self) -> Rect;
 }
 
 pub fn surface_to_texture<'a>(texture_creator: &'a TextureCreator<WindowContext>, surface: Surface) -> Texture<'a> {
