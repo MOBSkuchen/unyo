@@ -61,24 +61,39 @@ lazy_static! {
 pub struct USize((u32, u32));
 
 impl USize {
+    #[inline]
     pub fn scale(&self, s: f32) -> USize {
         USize(((self.0.0 as f32 * s) as u32, (self.0.1 as f32 * s) as u32))
     }
 
+    #[inline]
     pub fn scale_1(&self, s: f32) -> USize {
         USize(((self.0.0 as f32 * s) as u32, self.0.1))
     }
 
+    #[inline]
+    pub fn scale_1_2(&self, s1: f32, s2: f32) -> USize {
+        USize(((self.0.0 as f32 * s1) as u32, (self.0.1 as f32 * s2) as u32))
+    }
+
+    #[inline]
     pub fn scale_2(&self, s: f32) -> USize {
         USize((self.0.0, (self.0.1 as f32 * s) as u32))
     }
 
+    #[inline]
     pub fn one(&self) -> u32 {
         self.0.0
     }
 
+    #[inline]
     pub fn two(&self) -> u32 {
         self.0.1
+    }
+
+    #[inline]
+    pub fn to_rect(&self, x: i32, y: i32) -> Rect {
+        Rect::new(x, y, self.0.0, self.0.1)
     }
 }
 
@@ -267,8 +282,8 @@ impl UIContext {
         self.canvas.present();
     }
     
-    pub fn size(&self) -> (u32, u32) {
-        self.canvas.window().size()
+    pub fn size(&self) -> USize {
+        self.canvas.window().size().into()
     }
     
     pub fn draw(&mut self, drawable: &impl Drawable, uihelper: &UIHelper) {
