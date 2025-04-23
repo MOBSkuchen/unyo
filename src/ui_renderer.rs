@@ -4,7 +4,7 @@ use sdl2::EventPump;
 use sdl2::gfx::primitives::{DrawRenderer};
 use sdl2::image::{InitFlag, LoadTexture};
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use sdl2::render::{Texture, TextureCreator, WindowCanvas};
 use sdl2::surface::Surface;
 use sdl2::ttf::{Sdl2TtfContext};
@@ -21,8 +21,9 @@ pub fn get_custom_font_size(s: f64) -> u16 {
 }
 
 pub enum FontSize {
-    SuperLarge = 32 * 10,
-    Large = 16 * 10,
+    SuperLarge = 16 * 10,
+    LargeL = 15 * 10,
+    LargeS = 9 * 10,
     MediumL = 5 * 10,
     MediumM = 4 * 10,
     MediumS = 3 * 10,
@@ -168,7 +169,8 @@ pub struct FontOwner<'a> {
     pub jb_medium_l: Font<'a>,
     pub jb_medium_m: Font<'a>,
     pub jb_medium_s: Font<'a>,
-    pub jb_large: Font<'a>
+    pub jb_large_l: Font<'a>,
+    pub jb_large_s: Font<'a>,
 }
 
 impl<'a> FontOwner<'a> {
@@ -177,9 +179,10 @@ impl<'a> FontOwner<'a> {
         let jb_medium_m = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumM.to_real_size());
         let jb_medium_s = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumS.to_real_size());
 
-        let jb_large = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumL.to_real_size());
+        let jb_large_l = Font::load(AvailableFonts::JetbrainsMono, FontSize::LargeL.to_real_size());
+        let jb_large_s = Font::load(AvailableFonts::JetbrainsMono, FontSize::LargeS.to_real_size());
         
-        Self {jb_medium_l, jb_medium_m, jb_medium_s, jb_large}
+        Self {jb_medium_l, jb_medium_m, jb_medium_s, jb_large_l, jb_large_s}
     }
 }
 
@@ -249,6 +252,11 @@ impl UIContext {
         self.canvas.fill_rect(rect).expect("Failed to draw rectangle")
     }
 
+    pub fn draw_line(&mut self, start: Point, end: Point, thickness: i32, color: Color) {
+        self.canvas.set_draw_color(color);
+        self.canvas.thick_line(start.x as i16, start.y as i16, end.x as i16, end.y as i16, thickness as u8, color).expect("Failed to draw a line")
+    }
+
     pub fn draw_text(&mut self, x: i32, y: i32, font: &Font, text: &str, color: Color, uihelper: &UIHelper) -> (i32, i32) {
         let (surface, size) = font.write_text(text, color);
         let size = size.into();
@@ -292,7 +300,7 @@ impl UIContext {
 }
 
 pub trait Drawable {
-    fn draw(&self, ctx: &mut UIContext, texture_creator: &UIHelper);
+    fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper);
 }
 
 pub fn surface_to_texture<'a>(texture_creator: &'a TextureCreator<WindowContext>, surface: Surface) -> Texture<'a> {
