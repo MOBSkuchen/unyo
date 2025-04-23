@@ -1,7 +1,5 @@
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::TextureCreator;
-use sdl2::video::WindowContext;
 use crate::api::WeatherInfo;
 use crate::display::{TEXT_COLOR, WIDGET_COLOR};
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, EDGE_PADDING};
@@ -78,32 +76,36 @@ pub struct WeatherWidget {
 impl WeatherWidget {
     pub fn new(weather_info: WeatherInfo, w_size: (u32, u32)) -> Self {
         let (width, height) = w_size;
-        let position = Rect::new(EDGE_PADDING(), height as i32 - (height / 3) as i32 - EDGE_PADDING(), width / 2, ((height / 3) as i32 - EDGE_PADDING()) as u32);
+        let position = Rect::new(EDGE_PADDING(), height as i32 - (height / 3) as i32 - EDGE_PADDING(), (width as f32 / 1.8) as u32, ((height / 3) as i32 - EDGE_PADDING()) as u32);
         Self {weather_info, position}
     }
 
 
-    fn select_image_for_params(&self, rain: f64, cloud: Option<i64>, sun: Option<f64>) -> WeatherImage {
-        if !self.weather_info.is_day {
+    fn select_image_for_params(
+        &self,
+        rain: f64,
+        cloud: Option<i64>,
+        sun: Option<f64>,
+        is_day: Option<bool>,
+    ) -> WeatherImage {
+        if is_day.is_some_and(|t| {!t}) {
             return WeatherImage::Moon;
         }
-        
-        if rain > 1_f64 {
+
+        if rain > 0.0 {
             return WeatherImage::Rain;
         }
-        
-        if let Some(cloud) = cloud {
-            if cloud > 60 {
-                return WeatherImage::Cloud;
-            }
-        } else if let Some(sun) = sun {
-            if sun > 45_000_f64 {
-                return WeatherImage::Sun;
-            }
+
+        match (cloud, sun) {
+            (Some(cloud_pct), _) if cloud_pct > 50 => WeatherImage::Cloud,
+            (_, Some(sun_secs)) if sun_secs > 3600.0 => WeatherImage::Sun, // arbitrary "sunny" threshold
+            _ => WeatherImage::Cloud,
         }
-        
-        WeatherImage::Sun
     }
+}
+
+fn add_degree(x: f64) -> String {
+    format!("{x}°C")
 }
 
 impl Drawable for WeatherWidget {
@@ -115,7 +117,7 @@ impl Drawable for WeatherWidget {
         ctx.draw_rect(self.position, WIDGET_COLOR);
         let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, format!("WETTER (in {})", self.weather_info.city).as_str(), Color::GREY, uihelper);
         
-        let w_current_p = self.select_image_for_params(self.weather_info.current.1, Some(self.weather_info.current.2), None);
+        let w_current_p = self.select_image_for_params(self.weather_info.current.1, Some(self.weather_info.current.2), None, Some(self.weather_info.is_day));
         let (x, y) = ctx.draw_text(x + 3 * EDGE_PADDING(), y, &uihelper.font_owner.jb_medium_l, format!("Aktuell: {} °C", self.weather_info.current.0).as_str(), TEXT_COLOR, uihelper);
         ctx.draw_image(x + 5 * EDGE_PADDING(), y, medium_l_char_size.scale_1(2.5).into(), w_current_p.to_path(), uihelper);
         
@@ -130,38 +132,36 @@ impl Drawable for WeatherWidget {
             let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_l, name.as_str(), TEXT_COLOR, uihelper);
             x = rebound.0; y = rebound.1;
             
-            let img = self.select_image_for_params(data.2, None, Some(data.3));
+            let img = self.select_image_for_params(data.2, None, Some(data.3), None);
             ctx.draw_image(x + 2 * EDGE_PADDING(), y + EDGE_PADDING(), day_img_size, img.to_path(), uihelper);
 
-            ctx.draw_text(xp, y + EDGE_PADDING() +  medium_s_char_size.two() as i32, &uihelper.font_owner.jb_medium_l, data.0.to_string().as_str(), TEXT_COLOR, uihelper);
+            ctx.draw_text(xp, y + EDGE_PADDING() +  medium_s_char_size.two() as i32, &uihelper.font_owner.jb_medium_s, add_degree(data.0).as_str(), TEXT_COLOR, uihelper);
         }
         
         y = self.position.y + 10 * EDGE_PADDING();
-        x = self.position.x + EDGE_PADDING();
+        x = self.position.x + 5 * EDGE_PADDING();
         
         let hour_img_size = medium_m_char_size.scale_1(3_f32).scale_2(1.8).into();
 
         for (hour, data) in self.weather_info.hourly.iter().enumerate() {
+            let dstr = add_degree(data.0);
             let name = time_with_hour_offset(hour as i64);
 
-            let xp = x + EDGE_PADDING() * 8 * (hour != 0) as i32;
+            let xp = x + EDGE_PADDING() * 6 * (hour != 0) as i32;
 
-            let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_m, name.as_str(), TEXT_COLOR, uihelper);
+            let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_l, name.as_str(), TEXT_COLOR, uihelper);
             x = rebound.0 + 3 * EDGE_PADDING(); y = rebound.1;
+            
+            // Center text, add a full char to the right if there is no point, add 0.3 if there is
+            ctx.draw_text(if dstr.len() == 5 { xp + medium_m_char_size.one() as i32 } else { xp + (medium_m_char_size.one() as f32 * 0.3) as i32 }, y + medium_m_char_size.two() as i32, &uihelper.font_owner.jb_medium_m, dstr.as_str(), TEXT_COLOR, uihelper);
 
-            ctx.draw_text(xp + (medium_m_char_size.one() / 2) as i32, y + medium_m_char_size.two() as i32, &uihelper.font_owner.jb_medium_m, data.0.to_string().as_str(), TEXT_COLOR, uihelper);
-
-            let img = self.select_image_for_params(data.1, Some(data.2), None);
-            ctx.draw_image(xp + medium_m_char_size.one() as i32, y + 2 * medium_m_char_size.two() as i32, hour_img_size, img.to_path(), uihelper);
+            let img = self.select_image_for_params(data.1, Some(data.2), None, None);
+            ctx.draw_image(xp + (medium_m_char_size.one() as f32 * 1.5) as i32, y + 2 * medium_m_char_size.two() as i32, hour_img_size, img.to_path(), uihelper);
 
             if hour >= 4 {
                 break
             }
         }
 
-    }
-
-    fn get_pos(&self) -> Rect {
-        self.position
     }
 }
