@@ -3,6 +3,7 @@ use geolocation::Locator;
 use isahc::ReadResponseExt;
 use serde_json::Value;
 use crate::errors::{UnyoError, UnyoResult};
+use crate::ui_renderer::USize;
 use crate::weather_widget::{time_with_hour_offset, WeatherWidget};
 
 lazy_static! {
@@ -94,7 +95,7 @@ impl WeatherInfo {
         Self {current, daily, hourly, city, is_day}
     }
     
-    pub fn auto_construct_widget(w_size: (u32, u32)) -> WeatherWidget {
+    pub fn auto_construct_widget(w_size: &USize) -> WeatherWidget {
         let json = make_api_request();
         WeatherWidget::new(Self::from_json(json), w_size)
     }
