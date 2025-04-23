@@ -181,7 +181,7 @@ impl<'a> FontOwner<'a> {
 
         let jb_large_l = Font::load(AvailableFonts::JetbrainsMono, FontSize::LargeL.to_real_size());
         let jb_large_s = Font::load(AvailableFonts::JetbrainsMono, FontSize::LargeS.to_real_size());
-        
+
         Self {jb_medium_l, jb_medium_m, jb_medium_s, jb_large_l, jb_large_s}
     }
 }
@@ -213,7 +213,7 @@ impl UIContext {
     pub fn new(canvas: WindowCanvas) -> UnyoResult<Self> {
         Ok(Self { canvas})
     }
-    
+
     pub fn draw_texture(&mut self, texture: Texture, rect: Rect) {
         self.canvas.copy(&texture, None, rect).expect("Failed to draw texture");
     }

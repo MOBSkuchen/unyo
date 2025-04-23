@@ -4,6 +4,7 @@ use sdl2::rect::Rect;
 use crate::display::WIDGET_COLOR;
 use crate::fraction;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
+use crate::wifi_api::WIFI_STRENGTH;
 
 pub struct TimeWidget {
     position: Rect
@@ -47,6 +48,7 @@ impl TimeWidget {
 
 impl Drawable for TimeWidget {
     fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper) {
+        let path = WIFI_STRENGTH().to_path();
         let xp = self.position.x + 2 * EDGE_PADDING();
         let jb_large_l_size = uihelper.font_owner.jb_large_l.char_dim();
         
@@ -55,6 +57,7 @@ impl Drawable for TimeWidget {
         ctx.draw_rect(self.position, WIDGET_COLOR);
 
         let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), Color::WHITE, uihelper);
+        ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
         let (x, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), Color::WHITE, uihelper);
     }
 }
