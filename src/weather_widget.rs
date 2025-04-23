@@ -79,8 +79,7 @@ impl WeatherWidget {
         let position = w_size.scale_1_2(fraction(5, 9), 0.5).to_rect(EDGE_PADDING(), (w_size.two() / 2) as i32 - EDGE_PADDING());
         Self {weather_info, position}
     }
-
-
+    
     fn select_image_for_params(
         &self,
         rain: f64,
@@ -115,6 +114,7 @@ impl Drawable for WeatherWidget {
         let medium_s_char_size = uihelper.font_owner.jb_medium_s.char_dim();
         
         ctx.draw_rect(self.position, WIDGET_COLOR);
+        ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, Color::BLACK);
         let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, format!("WETTER (in {})", self.weather_info.city).as_str(), Color::GREY, uihelper);
         
         let w_current_p = self.select_image_for_params(self.weather_info.current.1, Some(self.weather_info.current.2), None, Some(self.weather_info.is_day));
