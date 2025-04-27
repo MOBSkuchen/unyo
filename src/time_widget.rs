@@ -69,9 +69,6 @@ impl Drawable for TimeWidget {
         let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), Color::WHITE, uihelper);
         ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
         let (x, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), Color::WHITE, uihelper);
-
-        ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TRACK_DATA_COLOR, &uihelper);
-        ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 4 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Name: Raspi Audio Player", TRACK_DATA_COLOR, &uihelper);
         
         if let Some(track) = &*BLUETOOTH_DATA() {
             let title_y = y + 2 * jb_large_l_size.one() as i32;
@@ -103,6 +100,9 @@ impl Drawable for TimeWidget {
             }
             // Duration
             ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.duration / 1000), TRACK_DATA_COLOR, &uihelper);
+        } else {
+            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TRACK_DATA_COLOR, &uihelper);
+            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Name: Raspi Audio Player", TRACK_DATA_COLOR, &uihelper);
         }
     }
 }
