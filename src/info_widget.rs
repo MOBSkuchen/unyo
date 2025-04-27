@@ -94,9 +94,9 @@ impl Drawable for InfoWidget {
             let ls = 5 * EDGE_PADDING();
             let line_end = x + 31 * EDGE_PADDING();
             let length = track.line_length(line_end - x - ls);
-            ctx.draw_line(Point::new(x + ls, line_y), Point::new(line_end, line_y), 10, Color::GREY);
+            ctx.draw_line(Point::new(x + ls, line_y), Point::new(line_end, line_y), EDGE_PADDING(), Color::GREY);
             if length != 0 {
-                ctx.draw_line(Point::new(x + ls, line_y), Point::new(x + ls + length, line_y), 10, Color::GREEN);
+                ctx.draw_line(Point::new(x + ls, line_y), Point::new(x + ls + length, line_y), EDGE_PADDING(), Color::GREEN);
             }
             // Duration
             ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.duration / 1000), TRACK_DATA_COLOR, &uihelper);
