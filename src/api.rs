@@ -1,10 +1,23 @@
+use std::sync::{LazyLock, Mutex, MutexGuard};
 use lazy_static::lazy_static;
 use geolocation::Locator;
 use isahc::ReadResponseExt;
 use serde_json::Value;
 use crate::errors::{UnyoError, UnyoResult};
-use crate::ui_renderer::USize;
-use crate::weather_widget::{time_with_hour_offset, WeatherWidget};
+use crate::weather_widget::{time_with_hour_offset};
+
+static _WEATHER_INFO: LazyLock<Mutex<Option<WeatherInfo>>> = LazyLock::new(|| {Mutex::from(None)});
+
+#[allow(non_snake_case)]
+pub fn WEATHER_INFO<'a>() -> MutexGuard<'a, Option<WeatherInfo>> {
+    _WEATHER_INFO.lock().unwrap()
+}
+
+#[allow(non_snake_case)]
+pub fn UPDATE_WEATHER_INFO() {
+    let info = WeatherInfo::from_json(make_api_request());
+    *_WEATHER_INFO.lock().unwrap() = Some(info);
+}
 
 lazy_static! {
     pub static ref LOCATION: Locator = {
@@ -93,10 +106,5 @@ impl WeatherInfo {
         };
         
         Self {current, daily, hourly, city, is_day}
-    }
-    
-    pub fn auto_construct_widget(w_size: &USize) -> WeatherWidget {
-        let json = make_api_request();
-        WeatherWidget::new(Self::from_json(json), w_size)
     }
 }
