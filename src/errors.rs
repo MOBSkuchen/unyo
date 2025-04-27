@@ -1,4 +1,5 @@
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum UnyoError {
     UiLoadFont,
     ApiReq(String, String),

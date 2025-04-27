@@ -68,7 +68,7 @@ impl Drawable for InfoWidget {
 
         let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), Color::WHITE, uihelper);
         ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
-        let (x, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), Color::WHITE, uihelper);
+        let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), Color::WHITE, uihelper);
         
         if let Some(track) = &*BLUETOOTH_DATA() {
             let title_y = y + 2 * jb_large_l_size.one() as i32;

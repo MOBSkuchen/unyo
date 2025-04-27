@@ -63,7 +63,7 @@ impl WeatherInfo {
         let mut city = LOCATION.city.clone();
         city.remove(0);
         city.remove(city.len()-1);
-        let mut is_day = false;
+        let is_day;
 
         let current = {
             let current = head.get("current").unwrap().as_object().unwrap();

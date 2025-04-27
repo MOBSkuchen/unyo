@@ -3,22 +3,18 @@ use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
 use zvariant::{Dict};
 
-fn format_time(seconds: u64) -> String {
-    let minutes = seconds / 60;
-    let seconds = seconds % 60;
-    format!("{}:{:02}", minutes, seconds)
-}
-
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
     LazyLock::new(|| {Mutex::new(None)});
 
+#[allow(non_snake_case)]
 pub async fn UPDATE_BLUETOOTH_DATA() {
     let data = _BLUETOOTH_CTL.get().unwrap().poll().await;
     *_BLUETOOTH_DATA.lock().unwrap() = data;
 }
 
+#[allow(non_snake_case)]
 pub fn BLUETOOTH_DATA<'a>() -> MutexGuard<'a, Option<PlaybackData>> {
     _BLUETOOTH_DATA.lock().unwrap()
 }
@@ -58,7 +54,8 @@ fn limit_string_size(input: String, max_length: usize) -> String {
 pub struct PlaybackData {
     pub title: String,
     pub artist: String,
-    pub playback_state: PlaybackState,
+    #[allow(dead_code)]
+    playback_state: PlaybackState,
     pub position: u32,
     pub duration: u32
 }
@@ -103,7 +100,7 @@ impl BluetoothController<'_> {
             HashMap<String, HashMap<String, zvariant::OwnedValue>>,
         > = self.proxy.call("GetManagedObjects", &()).await?;
         
-        for (path, interfaces) in managed_objects {
+        for (_, interfaces) in managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaPlayer1") {
                 
                 if let Some(track_value) = player_iface.get("Track") {

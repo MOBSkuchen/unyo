@@ -44,6 +44,7 @@ impl FontSize {
 }
 
 #[allow(non_snake_case)]
+// 10px on a Full-HD screen
 pub fn EDGE_PADDING() -> i32 {
     *_EDGE_PADDING_GLOB.get().unwrap()
 }
@@ -63,6 +64,7 @@ pub struct USize((u32, u32));
 
 impl USize {
     #[inline]
+    #[allow(dead_code)]
     pub fn scale(&self, s: f32) -> USize {
         USize(((self.0.0 as f32 * s) as u32, (self.0.1 as f32 * s) as u32))
     }
@@ -78,6 +80,7 @@ impl USize {
     }
 
     #[inline]
+    #[allow(dead_code)]
     pub fn scale_2(&self, s: f32) -> USize {
         USize((self.0.0, (self.0.1 as f32 * s) as u32))
     }
@@ -111,6 +114,7 @@ impl From<(u32, u32)> for USize {
 }
 
 pub enum AvailableFonts {
+    #[allow(dead_code)]
     Roboto,
     JetbrainsMono
 }
@@ -218,10 +222,12 @@ impl UIContext {
         Ok(Self { canvas})
     }
 
+    #[allow(dead_code)]
     pub fn draw_texture(&mut self, texture: Texture, rect: Rect) {
         self.canvas.copy(&texture, None, rect).expect("Failed to draw texture");
     }
 
+    #[allow(dead_code)]
     pub fn draw_texture2(&mut self, texture: Texture, x: i32, y: i32, w: u32, h: u32) {
         self.canvas.copy(&texture, None, Rect::new(x, y, w, h)).expect("Failed to draw texture");
     }
@@ -230,6 +236,7 @@ impl UIContext {
         self.canvas.copy(texture, None, Rect::new(x, y, size.0, size.1)).expect("Failed to draw texture");
     }
 
+    #[allow(dead_code)]
     pub fn draw_polygon(&mut self, vertices: Vec<(i16, i16)>, color: Color, filled: bool) {
         let mut vx = vec![];
         let mut vy = vec![];
@@ -275,15 +282,6 @@ impl UIContext {
         (x + size.0 as i32, y)
     }
     
-    pub fn center(&self, w: u32, h: u32) -> (i32, i32) {
-        let (ww, wh) = self.canvas.window().size();
-        (((ww - w) / 2) as i32, ((wh - h) / 2) as i32)
-    }
-    
-    pub fn center_rect(&self, w: u32, h: u32) -> Rect {
-        let center = self.center(w, h);
-        Rect::new(center.0, center.1, w, h)
-    }
     
     pub fn clear(&mut self, color: Color) {
         self.canvas.set_draw_color(color);
@@ -305,10 +303,6 @@ impl UIContext {
 
 pub trait Drawable {
     fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper);
-}
-
-pub fn surface_to_texture<'a>(texture_creator: &'a TextureCreator<WindowContext>, surface: Surface) -> Texture<'a> {
-    texture_creator.create_texture_from_surface(surface).unwrap()
 }
 
 pub fn init() -> Result<(sdl2::video::Window, EventPump), String> {

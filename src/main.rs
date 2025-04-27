@@ -1,6 +1,6 @@
 use crate::bluetooth::{BluetoothController};
 use crate::display::video_main;
-use crate::threads::{start_bt_data_update_thread, start_wifi_con_update_thread};
+use crate::threads::{init_threads};
 
 mod display;
 mod ui_renderer;
@@ -20,11 +20,7 @@ pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
 async fn main() {
     // Init and set Bluetooth controller
     bluetooth::_BLUETOOTH_CTL.set(BluetoothController::new().await.expect("Failed to init bt-ctl")).expect("Failed to set bt-ctl");
-    
-    // Start threads; TODO: Move to its own threads::init function?
-    start_bt_data_update_thread();
-    start_wifi_con_update_thread();
-    
+    init_threads();
     video_main().expect("FAILED");
 }
 

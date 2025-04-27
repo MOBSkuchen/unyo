@@ -2,10 +2,9 @@ use std::thread;
 use std::time::{Duration, Instant};
 use sdl2::event::Event;
 use sdl2::pixels::Color;
-use crate::api::WeatherInfo;
-use crate::bluetooth::BLUETOOTH_DATA;
 use crate::info_widget::InfoWidget;
 use crate::ui_renderer::{init, UIContext, UIHelper};
+use crate::weather_widget::WeatherWidget;
 
 pub const BACKGROUND_COLOR: Color = Color::RGB(35, 34, 34);
 pub const WIDGET_COLOR: Color = Color::RGB(58, 57, 57);
@@ -22,7 +21,7 @@ pub fn video_main() -> Result<(), String> {
 
     let exit_time = Instant::now() + Duration::from_secs(3600);
 
-    let weather_widget = WeatherInfo::auto_construct_widget(&ui_size);
+    let weather_widget = WeatherWidget::new(&ui_size);
     let info_widget = InfoWidget::new(&ui_size);
 
     'running: loop {
