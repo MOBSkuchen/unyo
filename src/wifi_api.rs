@@ -1,11 +1,11 @@
 use std::process::Command;
-use std::sync::{OnceLock};
+use std::sync::{LazyLock, Mutex};
 
-static _WIFI_STRENGTH_GLOB: OnceLock<WifiSignalBars> = OnceLock::new();
+static _WIFI_STRENGTH_GLOB: LazyLock<Mutex<WifiSignalBars>> = LazyLock::new(|| {Mutex::from(WifiSignalBars::NoSignal)});
 
 #[allow(non_snake_case)]
 pub fn WIFI_STRENGTH() -> WifiSignalBars {
-    *_WIFI_STRENGTH_GLOB.get().unwrap()
+    *_WIFI_STRENGTH_GLOB.lock().unwrap()
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -72,5 +72,5 @@ fn get_wifi_signal_bars() -> Option<WifiSignalBars> {
 }
 
 pub fn refresh_wifi_connectivity() {
-    _WIFI_STRENGTH_GLOB.set(get_wifi_signal_bars().unwrap_or(WifiSignalBars::NoSignal)).expect("Failed to find out wifi connection strength");
+    *_WIFI_STRENGTH_GLOB.lock().unwrap() = get_wifi_signal_bars().unwrap_or(WifiSignalBars::NoSignal);
 }

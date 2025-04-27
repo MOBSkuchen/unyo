@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 use crate::api::WeatherInfo;
+use crate::bluetooth::BLUETOOTH_DATA;
 use crate::time_widget::TimeWidget;
 use crate::ui_renderer::{init, UIContext, UIHelper};
 
@@ -28,6 +29,8 @@ pub fn video_main() -> Result<(), String> {
         if Instant::now() > exit_time {
             break 'running;
         }
+        
+        println!("{:#?}", BLUETOOTH_DATA());
         
         for event in event_pump.poll_iter() {
             if let Event::Quit { .. } = event {
