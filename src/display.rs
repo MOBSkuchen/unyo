@@ -30,8 +30,6 @@ pub fn video_main() -> Result<(), String> {
             break 'running;
         }
         
-        println!("{:#?}", BLUETOOTH_DATA());
-        
         for event in event_pump.poll_iter() {
             if let Event::Quit { .. } = event {
                 break 'running;

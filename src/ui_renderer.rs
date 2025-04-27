@@ -157,6 +157,10 @@ impl<'a> Font<'a> {
         let surface = self.0.render(text).solid(color).unwrap();
         (surface, size.into())
     }
+
+    pub fn size_of_text(&self, text: &str) -> USize {
+        self.0.size_of(text).unwrap().into()
+    }
 }
 
 impl<'a> From<sdl2::ttf::Font<'a, 'a>> for Font<'a> {
