@@ -9,7 +9,7 @@ use crate::wifi_api::WIFI_STRENGTH;
 
 const TRACK_DATA_COLOR: Color = Color::RGB(250, 250, 250);
 
-pub struct TimeWidget {
+pub struct InfoWidget {
     position: Rect
 }
 
@@ -20,7 +20,7 @@ fn format_time(seconds: u32) -> String {
 }
 
 
-impl TimeWidget {
+impl InfoWidget {
     pub fn new(screen_size: &USize) -> Self {
         Self { position: screen_size.scale_1_2(fraction(5, 9), 0.5).to_rect(EDGE_PADDING(), EDGE_PADDING()) }
     }
@@ -56,7 +56,7 @@ impl TimeWidget {
     }
 }
 
-impl Drawable for TimeWidget {
+impl Drawable for InfoWidget {
     fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper) {
         let path = WIFI_STRENGTH().to_path();
         let xp = self.position.x + 2 * EDGE_PADDING();

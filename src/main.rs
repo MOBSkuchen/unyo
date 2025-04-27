@@ -7,7 +7,7 @@ mod ui_renderer;
 mod api;
 mod errors;
 mod weather_widget;
-mod time_widget;
+mod info_widget;
 mod wifi_api;
 mod threads;
 mod bluetooth;

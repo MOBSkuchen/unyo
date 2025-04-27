@@ -4,7 +4,7 @@ use sdl2::event::Event;
 use sdl2::pixels::Color;
 use crate::api::WeatherInfo;
 use crate::bluetooth::BLUETOOTH_DATA;
-use crate::time_widget::TimeWidget;
+use crate::info_widget::InfoWidget;
 use crate::ui_renderer::{init, UIContext, UIHelper};
 
 pub const BACKGROUND_COLOR: Color = Color::RGB(35, 34, 34);
@@ -23,7 +23,7 @@ pub fn video_main() -> Result<(), String> {
     let exit_time = Instant::now() + Duration::from_secs(3600);
 
     let weather_widget = WeatherInfo::auto_construct_widget(&ui_size);
-    let time_widget = TimeWidget::new(&ui_size);
+    let info_widget = InfoWidget::new(&ui_size);
 
     'running: loop {
         if Instant::now() > exit_time {
@@ -37,7 +37,7 @@ pub fn video_main() -> Result<(), String> {
         }
         
         ui.clear(BACKGROUND_COLOR);
-        ui.draw(&time_widget, &uihelper);
+        ui.draw(&info_widget, &uihelper);
         ui.draw(&weather_widget, &uihelper);
         ui.render();
         
