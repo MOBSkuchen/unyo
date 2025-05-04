@@ -1,13 +1,10 @@
 use chrono::{Datelike, Weekday};
-use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{BLUETOOTH_DATA};
-use crate::display::WIDGET_COLOR;
-use crate::fraction;
+use crate::{fraction};
+use crate::color::{BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use crate::wifi_api::WIFI_STRENGTH;
-
-const TRACK_DATA_COLOR: Color = Color::RGB(250, 250, 250);
 
 pub struct InfoWidget {
     position: Rect
@@ -64,11 +61,11 @@ impl Drawable for InfoWidget {
         
         let (date, time) = Self::get_time_strs();
         
-        ctx.draw_rect(self.position, WIDGET_COLOR);
+        ctx.draw_rect(self.position, BG_SHADED);
 
-        let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), Color::WHITE, uihelper);
+        let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), TXT_DEFAULT, uihelper);
         ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
-        let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), Color::WHITE, uihelper);
+        let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
         
         if let Some(track) = &*BLUETOOTH_DATA() {
             let title_y = y + 2 * jb_large_l_size.one() as i32;
@@ -85,24 +82,24 @@ impl Drawable for InfoWidget {
             let delta_artist = artist_bounds - size_of_artist_text;
 
             // Title
-            ctx.draw_text(xp + delta_title / 2, title_y, &uihelper.font_owner.jb_medium_l, track.title.as_str(), TRACK_DATA_COLOR, &uihelper);
+            ctx.draw_text(xp + delta_title / 2, title_y, &uihelper.font_owner.jb_medium_l, track.title.as_str(), TXT_DEFAULT, &uihelper);
             // Artist
-            ctx.draw_text(xp + delta_artist / 2, artist_y, &uihelper.font_owner.jb_medium_m, track.artist.as_str(), TRACK_DATA_COLOR, &uihelper);
+            ctx.draw_text(xp + delta_artist / 2, artist_y, &uihelper.font_owner.jb_medium_m, track.artist.as_str(), TXT_SUBTEXT, &uihelper);
             // Position
-            let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.position / 1000), TRACK_DATA_COLOR, &uihelper);
+            let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.position / 1000), TXT_SUBTEXT, &uihelper);
             // Line
             let ls = 5 * EDGE_PADDING();
             let line_end = x + 31 * EDGE_PADDING();
             let length = track.line_length(line_end - x - ls);
-            ctx.draw_line(Point::new(x + ls, line_y), Point::new(line_end, line_y), EDGE_PADDING(), Color::GREY);
+            ctx.draw_line(Point::new(x + ls, line_y), Point::new(line_end, line_y), EDGE_PADDING(), PB_EMPTY);
             if length != 0 {
-                ctx.draw_line(Point::new(x + ls, line_y), Point::new(x + ls + length, line_y), EDGE_PADDING(), Color::GREEN);
+                ctx.draw_line(Point::new(x + ls, line_y), Point::new(x + ls + length, line_y), EDGE_PADDING(), PB_FULLY);
             }
             // Duration
-            ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.duration / 1000), TRACK_DATA_COLOR, &uihelper);
+            ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.duration / 1000), TXT_SUBTEXT, &uihelper);
         } else {
-            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TRACK_DATA_COLOR, &uihelper);
-            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Name: Raspi Audio Player", TRACK_DATA_COLOR, &uihelper);
+            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TXT_DEFAULT, &uihelper);
+            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Name: Raspi Audio Player", TXT_SUBTEXT, &uihelper);
         }
     }
 }

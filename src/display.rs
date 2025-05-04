@@ -1,14 +1,10 @@
 use std::thread;
 use std::time::{Duration, Instant};
 use sdl2::event::Event;
-use sdl2::pixels::Color;
+use crate::color::BG_DARKEST;
 use crate::info_widget::InfoWidget;
 use crate::ui_renderer::{init, UIContext, UIHelper};
 use crate::weather_widget::WeatherWidget;
-
-pub const BACKGROUND_COLOR: Color = Color::RGB(35, 34, 34);
-pub const WIDGET_COLOR: Color = Color::RGB(58, 57, 57);
-pub const TEXT_COLOR: Color = Color::RGB(0, 0, 0);
 
 pub fn video_main() -> Result<(), String> {
     let (window, mut event_pump) = init()?;
@@ -35,7 +31,7 @@ pub fn video_main() -> Result<(), String> {
             }
         }
         
-        ui.clear(BACKGROUND_COLOR);
+        ui.clear(BG_DARKEST);
         ui.draw(&info_widget, &uihelper);
         ui.draw(&weather_widget, &uihelper);
         ui.render();
