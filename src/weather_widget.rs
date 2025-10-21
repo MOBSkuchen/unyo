@@ -107,15 +107,18 @@ fn add_degree(x: f64) -> String {
 
 impl Drawable for WeatherWidget {
     fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper) {
-        if let Some(weather_info) = &*WEATHER_INFO() {
-            let medium_l_char_size = uihelper.font_owner.jb_medium_l.char_dim();
-            let medium_m_char_size = uihelper.font_owner.jb_medium_m.char_dim();
-            let medium_s_char_size = uihelper.font_owner.jb_medium_s.char_dim();
+        let medium_l_char_size = uihelper.font_owner.jb_medium_l.char_dim();
+        let medium_m_char_size = uihelper.font_owner.jb_medium_m.char_dim();
+        let medium_s_char_size = uihelper.font_owner.jb_medium_s.char_dim();
 
-            ctx.draw_rect(self.position, BG_SHADED);
-            ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, DIV_LINE);
+        ctx.draw_rect(self.position, BG_SHADED);
+        ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, DIV_LINE);
+
+        ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, "WETTER fehlt gerade", TXT_DEFAULT, uihelper);
+/*
+        if let Some(weather_info) = &*WEATHER_INFO() {
             let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l,
-                                       format!("WETTER (in {})", limit_string_size(weather_info.city, 9)).as_str(), TXT_DEFAULT, uihelper);
+                                       format!("WETTER (in {})", limit_string_size(&weather_info.city, 9)).as_str(), TXT_DEFAULT, uihelper);
 
             let w_current_p = self.select_image_for_params(weather_info.current.1, Some(weather_info.current.2), None, Some(weather_info.is_day));
             let (x, y) = ctx.draw_text(x + (medium_l_char_size.one() * 4) as i32, y, &uihelper.font_owner.jb_medium_l,
@@ -165,6 +168,8 @@ impl Drawable for WeatherWidget {
                     break;
                 }
             }
-        }
+        } else {
+            // NO WEATHER DATA
+        }*/
     }
 }

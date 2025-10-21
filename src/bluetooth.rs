@@ -40,7 +40,7 @@ impl From<String> for PlaybackState {
 }
 
 #[inline]
-pub fn limit_string_size(input: String, max_length: usize) -> String {
+pub fn limit_string_size(input: &String, max_length: usize) -> String {
     if input.len() > max_length {
         let truncated = input.chars().take(max_length - 3).collect::<String>();
         format!("{}...", truncated)
@@ -76,7 +76,7 @@ impl PlaybackData {
 
 impl From<(String, String, PlaybackState, u32, u32)> for PlaybackData {
     fn from(value: (String, String, PlaybackState, u32, u32)) -> Self {
-        Self::new(limit_string_size(value.0, 41), limit_string_size(value.1, 20), value.2, value.3, value.4)
+        Self::new(limit_string_size(&value.0, 41), limit_string_size(&value.1, 20), value.2, value.3, value.4)
     }
 }
 
@@ -106,9 +106,9 @@ impl BluetoothController<'_> {
                 if let Some(track_value) = player_iface.get("Track") {
                     let track: Dict = track_value.downcast_ref()?;
 
-                    let title: String = track.get(&"Title".to_string())?.or(Some("Unknown".to_string())).unwrap();
-                    let artist: String = track.get(&"Artist".to_string())?.or(Some("Unknown".to_string())).unwrap();
-                    let duration: u32 = track.get(&"Duration".to_string())?.or(Some(0)).unwrap();
+                    let title: String = track.get(&"Title".to_string())?.unwrap_or("Unknown".to_string());
+                    let artist: String = track.get(&"Artist".to_string())?.unwrap_or("Unknown".to_string());
+                    let duration: u32 = track.get(&"Duration".to_string())?.unwrap_or(0);
 
                     if let Some(position_value) = player_iface.get("Position") {
                         if let Ok(pos) = position_value.downcast_ref::<u32>() {
