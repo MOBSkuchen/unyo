@@ -2,6 +2,7 @@ use sdl2::rect::Rect;
 use crate::api::{WEATHER_INFO};
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use chrono::{Datelike, Duration, Local, Timelike, Weekday};
+use crate::bluetooth::limit_string_size;
 use crate::color::{BG_SHADED, DIV_LINE, TXT_DEFAULT, TXT_SUBTEXT, TXT_WEATHER};
 use crate::fraction;
 
@@ -114,7 +115,7 @@ impl Drawable for WeatherWidget {
             ctx.draw_rect(self.position, BG_SHADED);
             ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, DIV_LINE);
             let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l,
-                                       format!("WETTER (in {})", weather_info.city).as_str(), TXT_DEFAULT, uihelper);
+                                       format!("WETTER (in {})", limit_string_size(weather_info.city, 9)).as_str(), TXT_DEFAULT, uihelper);
 
             let w_current_p = self.select_image_for_params(weather_info.current.1, Some(weather_info.current.2), None, Some(weather_info.is_day));
             let (x, y) = ctx.draw_text(x + (medium_l_char_size.one() * 4) as i32, y, &uihelper.font_owner.jb_medium_l,

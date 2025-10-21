@@ -40,7 +40,7 @@ impl From<String> for PlaybackState {
 }
 
 #[inline]
-fn limit_string_size(input: String, max_length: usize) -> String {
+pub fn limit_string_size(input: String, max_length: usize) -> String {
     if input.len() > max_length {
         let truncated = input.chars().take(max_length - 3).collect::<String>();
         format!("{}...", truncated)
