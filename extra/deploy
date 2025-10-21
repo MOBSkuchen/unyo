@@ -1,0 +1,31 @@
+#!/bin/sh
+
+sudo systemctl stop unyo1
+sudo systemctl disable unyo1
+
+REPO_URL="https://github.com/MOBSkuchen/unyo"
+DIR_NAME="unyo"
+
+if [ ! -d "$DIR_NAME" ]; then
+    git clone "$REPO_URL"
+    cd "$DIR_NAME"
+else
+    cd "$DIR_NAME" && git pull
+fi
+
+read -r branch_name < "extra/DEVEL_BRANCH"
+
+echo "Development branch: '$branch_name'"
+git checkout "$branch_name"
+
+/home/jasper/.cargo/bin/cargo build --profile release
+cp target/release/unyo /home/jasper/exe/unyo
+
+cp extra/deploy /home/jasper/deploy
+chmod +x /home/jasper/deploy
+
+sudo systemctl enable unyo1
+
+echo Testing in 3 seconds, press ctrl+c to quit
+sleep 3
+sudo systemctl start unyo1
