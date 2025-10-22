@@ -92,7 +92,14 @@ pub async fn set_bluetooth_device_name(new_name: &str) -> Result<(), zbus::Error
         "org.freedesktop.DBus.Properties",
     ).await?;
 
-    adapter_proxy.call_method("Set", &["org.bluez.Adapter1", "Alias", new_name]).await?;
+    adapter_proxy.call_method(
+        "Set",
+        &(
+            "org.bluez.Adapter1",
+            "Alias",
+            Value::new(new_name), // Correctly pass a zvariant::Value
+        )
+    ).await?;
     Ok(())
 }
 
