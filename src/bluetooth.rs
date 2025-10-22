@@ -126,18 +126,14 @@ impl BluetoothController<'_> {
         > = self.proxy.call("GetManagedObjects", &()).await?;
 
         // O(2N), but idc
-        let mut volume = 0u32;
+        let mut volume = 0u16;
         for (_, interfaces) in &managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
                 if let Some(r_volume) = player_iface.get("Volume") {
-                    logln!("{}", r_volume.value_signature());
-                    logln!("{}", r_volume.downcast_ref::<u16>()?);
-                    // volume = r_volume.downcast_ref();
+                    volume = r_volume.downcast_ref::<u16>()?;
                 }
             }
         }
-        logln!("Volume: {volume}");
-        
         for (_, interfaces) in managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaPlayer1") {
                 
@@ -158,7 +154,7 @@ impl BluetoothController<'_> {
                             if let Some(status_value) = player_iface.get("Status") {
                                 if let Ok(status) = status_value.downcast_ref::<String>() {
                                     logln!("Returning that shit");
-                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, 0)))
+                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume as u32)))
                                 }
                             }
                         }
