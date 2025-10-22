@@ -1,7 +1,7 @@
 use zbus::{Connection, Proxy};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
-use zvariant::{Dict};
+use zvariant::{Dict, Value};
 use crate::parameters::load_device_name_or_default;
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
