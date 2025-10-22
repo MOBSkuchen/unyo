@@ -1,5 +1,5 @@
 use sdl2::rect::Rect;
-use crate::api::{WEATHER_INFO};
+use crate::api::{UPDATE_WEATHER_INFO, WEATHER_INFO};
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use chrono::{Datelike, Duration, Local, Timelike, Weekday};
 use crate::bluetooth::limit_string_size;
@@ -114,8 +114,6 @@ impl Drawable for WeatherWidget {
         ctx.draw_rect(self.position, BG_SHADED);
         ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, DIV_LINE);
 
-        ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, "WETTER fehlt gerade", TXT_DEFAULT, uihelper);
-/*
         if let Some(weather_info) = &*WEATHER_INFO() {
             let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l,
                                        format!("WETTER (in {})", limit_string_size(&weather_info.city, 9)).as_str(), TXT_DEFAULT, uihelper);
@@ -170,6 +168,9 @@ impl Drawable for WeatherWidget {
             }
         } else {
             // NO WEATHER DATA
-        }*/
+            ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, "WETTER fehlt gerade", TXT_DEFAULT, uihelper);
+            // Update data
+            UPDATE_WEATHER_INFO();
+        }
     }
 }
