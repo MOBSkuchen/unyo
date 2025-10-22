@@ -131,7 +131,7 @@ impl BluetoothController<'_> {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
                 if let Some(r_volume) = player_iface.get("Volume") {
                     logln!("{}", r_volume.value_signature());
-                    logln!("{}", r_volume.downcast_ref::<String>()?);
+                    logln!("{}", r_volume.downcast_ref::<u16>()?);
                     // volume = r_volume.downcast_ref();
                 }
             }
