@@ -2,6 +2,7 @@ use zbus::{Connection, Proxy};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
 use zvariant::{Dict, Value};
+use crate::logln;
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
@@ -56,7 +57,9 @@ pub struct PlaybackData {
     #[allow(dead_code)]
     playback_state: PlaybackState,
     pub position: u32,
-    pub duration: u32
+    pub duration: u32,
+    pub shuffle: bool,
+    pub volume: u32,
 }
 
 impl PlaybackData {
@@ -64,8 +67,10 @@ impl PlaybackData {
                artist: String,
                playback_state: PlaybackState,
                position: u32,
-               duration: u32) -> Self {
-        Self { title, artist, playback_state, position, duration }
+               duration: u32,
+               shuffle: bool,
+               volume: u32) -> Self {
+        Self { title, artist, playback_state, position, duration, shuffle, volume }
     }
     
     pub fn line_length(&self, full: i32) -> i32 {
@@ -73,9 +78,9 @@ impl PlaybackData {
     }
 }
 
-impl From<(String, String, PlaybackState, u32, u32)> for PlaybackData {
-    fn from(value: (String, String, PlaybackState, u32, u32)) -> Self {
-        Self::new(limit_string_size(&value.0, 41), limit_string_size(&value.1, 20), value.2, value.3, value.4)
+impl From<(String, String, PlaybackState, u32, u32, bool, u32)> for PlaybackData {
+    fn from(value: (String, String, PlaybackState, u32, u32, bool, u32)) -> Self {
+        Self::new(limit_string_size(&value.0, 41), limit_string_size(&value.1, 20), value.2, value.3, value.4, value.5, value.6)
     }
 }
 
@@ -123,27 +128,43 @@ impl BluetoothController<'_> {
         Ok(Self {proxy})
     }
     
-    async fn get_data(&self) -> zbus::Result<Option<(String, String, PlaybackState, u32, u32)>> {
+    async fn get_data(&self) -> zbus::Result<Option<(String, String, PlaybackState, u32, u32, bool, u32)>> {
         let managed_objects: HashMap<
             zvariant::OwnedObjectPath,
             HashMap<String, HashMap<String, zvariant::OwnedValue>>,
         > = self.proxy.call("GetManagedObjects", &()).await?;
+
+        // O(2N), but idc
+        let mut volume: u32 = 0;
+        for (_, interfaces) in &managed_objects {
+            if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
+                if let Some(r_volume) = player_iface.get("") {
+                    volume = r_volume.downcast_ref()?;
+                }
+            }
+        }
+
+        logln!("Volume: {volume}");
         
         for (_, interfaces) in managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaPlayer1") {
                 
-                if let Some(track_value) = player_iface.get("Track") {
-                    let track: Dict = track_value.downcast_ref()?;
+                if let Some(shuffle) = player_iface.get("Shuffle") {
+                    // Shuffle: off, alltracks, group
+                    let shuffle = shuffle.downcast_ref::<String>()? != "off";
+                    if let Some(track_value) = player_iface.get("Track") {
+                        let track: Dict = track_value.downcast_ref()?;
 
-                    let title: String = track.get(&"Title".to_string())?.unwrap_or("Unknown".to_string());
-                    let artist: String = track.get(&"Artist".to_string())?.unwrap_or("Unknown".to_string());
-                    let duration: u32 = track.get(&"Duration".to_string())?.unwrap_or(0);
+                        let title: String = track.get(&"Title".to_string())?.unwrap_or("Unknown".to_string());
+                        let artist: String = track.get(&"Artist".to_string())?.unwrap_or("Unknown".to_string());
+                        let duration: u32 = track.get(&"Duration".to_string())?.unwrap_or(0);
 
-                    if let Some(position_value) = player_iface.get("Position") {
-                        if let Ok(pos) = position_value.downcast_ref::<u32>() {
-                            if let Some(status_value) = player_iface.get("Status") {
-                                if let Ok(status) = status_value.downcast_ref::<String>() {
-                                    return Ok(Some((title, artist, status.into(), pos, duration)))
+                        if let Some(position_value) = player_iface.get("Position") {
+                            if let Ok(pos) = position_value.downcast_ref::<u32>() {
+                                if let Some(status_value) = player_iface.get("Status") {
+                                    if let Ok(status) = status_value.downcast_ref::<String>() {
+                                        return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume)))
+                                    }
                                 }
                             }
                         }
