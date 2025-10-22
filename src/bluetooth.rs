@@ -125,17 +125,17 @@ impl BluetoothController<'_> {
             HashMap<String, HashMap<String, zvariant::OwnedValue>>,
         > = self.proxy.call("GetManagedObjects", &()).await?;
 
-        // O(2N), but idc
-        let mut volume: u32 = 0;
-        for (_, interfaces) in &managed_objects {
-            if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
-                if let Some(r_volume) = player_iface.get("Volume") {
-                    volume = r_volume.downcast_ref()?;
-                }
-            }
-        }
-
-        logln!("Volume: {volume}");
+        // // O(2N), but idc
+        // let mut volume: u32 = 0;
+        // for (_, interfaces) in &managed_objects {
+        //     if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
+        //         if let Some(r_volume) = player_iface.get("Volume") {
+        //             volume = r_volume.downcast_ref()?;
+        //         }
+        //     }
+        // }
+//
+        // logln!("Volume: {volume}");
         
         for (_, interfaces) in managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaPlayer1") {
@@ -156,7 +156,8 @@ impl BluetoothController<'_> {
                         if let Ok(pos) = position_value.downcast_ref::<u32>() {
                             if let Some(status_value) = player_iface.get("Status") {
                                 if let Ok(status) = status_value.downcast_ref::<String>() {
-                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume)))
+                                    logln!("Returning that shit");
+                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, 0)))
                                 }
                             }
                         }

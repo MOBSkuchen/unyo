@@ -36,7 +36,7 @@ fn start_weather_update_thread() {
 }
 
 fn start_general_update_thread() {
-    tokio::spawn(async {loop {
+    tokio::spawn(async {{
         update_all_data().await;
         tokio::time::sleep(GENERAL_UPDATE).await;
     }});

@@ -1,4 +1,5 @@
 use chrono::{Datelike, Weekday};
+use sdl2::log::log;
 use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{BLUETOOTH_DATA};
 use crate::{fraction, logln};
