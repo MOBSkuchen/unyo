@@ -140,22 +140,23 @@ impl BluetoothController<'_> {
         for (_, interfaces) in managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaPlayer1") {
                 
-                if let Some(shuffle) = player_iface.get("Shuffle") {
+                let shuffle = if let Some(shuffle) = player_iface.get("Shuffle") {
                     // Shuffle: off, alltracks, group
-                    let shuffle = shuffle.downcast_ref::<String>()? != "off";
-                    if let Some(track_value) = player_iface.get("Track") {
-                        let track: Dict = track_value.downcast_ref()?;
+                    shuffle.downcast_ref::<String>()? != "off"
+                } else {false};
 
-                        let title: String = track.get(&"Title".to_string())?.unwrap_or("Unknown".to_string());
-                        let artist: String = track.get(&"Artist".to_string())?.unwrap_or("Unknown".to_string());
-                        let duration: u32 = track.get(&"Duration".to_string())?.unwrap_or(0);
+                if let Some(track_value) = player_iface.get("Track") {
+                    let track: Dict = track_value.downcast_ref()?;
 
-                        if let Some(position_value) = player_iface.get("Position") {
-                            if let Ok(pos) = position_value.downcast_ref::<u32>() {
-                                if let Some(status_value) = player_iface.get("Status") {
-                                    if let Ok(status) = status_value.downcast_ref::<String>() {
-                                        return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume)))
-                                    }
+                    let title: String = track.get(&"Title".to_string())?.unwrap_or("Unknown".to_string());
+                    let artist: String = track.get(&"Artist".to_string())?.unwrap_or("Unknown".to_string());
+                    let duration: u32 = track.get(&"Duration".to_string())?.unwrap_or(0);
+
+                    if let Some(position_value) = player_iface.get("Position") {
+                        if let Ok(pos) = position_value.downcast_ref::<u32>() {
+                            if let Some(status_value) = player_iface.get("Status") {
+                                if let Ok(status) = status_value.downcast_ref::<String>() {
+                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume)))
                                 }
                             }
                         }
