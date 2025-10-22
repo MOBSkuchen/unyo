@@ -138,7 +138,7 @@ impl BluetoothController<'_> {
         let mut volume: u32 = 0;
         for (_, interfaces) in &managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
-                if let Some(r_volume) = player_iface.get("") {
+                if let Some(r_volume) = player_iface.get("Volume") {
                     volume = r_volume.downcast_ref()?;
                 }
             }
