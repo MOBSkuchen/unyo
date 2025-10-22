@@ -35,5 +35,6 @@ macro_rules! logln {
     };
     ($($arg:tt)*) => {{
         $crate::logger::_log(format!($($arg)*).as_str());
+        $crate::logger::_log("\n")
     }};
 }
