@@ -2,11 +2,13 @@ use zbus::{Connection, Proxy};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
 use zvariant::{Dict};
-
+use crate::sysfiles::load_device_name_or_default;
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
     LazyLock::new(|| {Mutex::new(None)});
+pub static _BLUETOOTH_DEVICE_NAME: LazyLock<Mutex<String>> =
+    LazyLock::new(|| {Mutex::new(load_device_name_or_default())});
 
 #[allow(non_snake_case)]
 pub async fn UPDATE_BLUETOOTH_DATA() {
@@ -78,6 +80,20 @@ impl From<(String, String, PlaybackState, u32, u32)> for PlaybackData {
     fn from(value: (String, String, PlaybackState, u32, u32)) -> Self {
         Self::new(limit_string_size(&value.0, 41), limit_string_size(&value.1, 20), value.2, value.3, value.4)
     }
+}
+
+pub async fn set_bluetooth_device_name(new_name: &str) -> Result<(), zbus::Error> {
+    let connection = Connection::system().await?;
+
+    let adapter_proxy = Proxy::new(
+        &connection,
+        "org.bluez",
+        "/org/bluez/hci0",
+        "org.freedesktop.DBus.Properties",
+    ).await?;
+
+    adapter_proxy.call_method("SetDeviceName", &[&new_name]).await?;
+    Ok(())
 }
 
 impl BluetoothController<'_> {

@@ -1,5 +1,6 @@
-use crate::bluetooth::{BluetoothController};
+use crate::bluetooth::{set_bluetooth_device_name, BluetoothController};
 use crate::display::video_main;
+use crate::sysfiles::load_device_name_or_default;
 use crate::threads::{init_threads};
 
 mod display;
@@ -12,6 +13,7 @@ mod wifi_api;
 mod threads;
 mod bluetooth;
 mod color;
+mod sysfiles;
 
 pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
     a as f32 / b as f32
