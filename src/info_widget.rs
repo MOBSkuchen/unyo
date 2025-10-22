@@ -3,6 +3,7 @@ use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{BLUETOOTH_DATA};
 use crate::{fraction};
 use crate::color::{BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
+use crate::parameters::load_device_name_or_default;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use crate::wifi_api::WIFI_STRENGTH;
 
@@ -86,7 +87,7 @@ impl Drawable for InfoWidget {
             // Artist
             ctx.draw_text(xp + delta_artist / 2, artist_y, &uihelper.font_owner.jb_medium_m, track.artist.as_str(), TXT_SUBTEXT, &uihelper);
             // Position
-            let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.position / 1000), TXT_SUBTEXT, &uihelper);
+            let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.position / 1000), TXT_SUBTEXT, &uihelper);
             // Line
             let ls = 5 * EDGE_PADDING();
             let line_end = x + 31 * EDGE_PADDING();
@@ -96,10 +97,10 @@ impl Drawable for InfoWidget {
                 ctx.draw_line(Point::new(x + ls, line_y), Point::new(x + ls + length, line_y), EDGE_PADDING(), PB_FULLY);
             }
             // Duration
-            ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &*format_time(track.duration / 1000), TXT_SUBTEXT, &uihelper);
+            ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.duration / 1000), TXT_SUBTEXT, uihelper);
         } else {
-            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TXT_DEFAULT, &uihelper);
-            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Name: Raspi Audio Player", TXT_SUBTEXT, &uihelper);
+            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TXT_DEFAULT, uihelper);
+            ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, format!("Name: {}", load_device_name_or_default()).as_str(), TXT_SUBTEXT, &uihelper);
         }
     }
 }

@@ -2,13 +2,10 @@ use zbus::{Connection, Proxy};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
 use zvariant::{Dict, Value};
-use crate::parameters::load_device_name_or_default;
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
     LazyLock::new(|| {Mutex::new(None)});
-pub static _BLUETOOTH_DEVICE_NAME: LazyLock<Mutex<String>> =
-    LazyLock::new(|| {Mutex::new(load_device_name_or_default())});
 
 #[allow(non_snake_case)]
 pub async fn UPDATE_BLUETOOTH_DATA() {
@@ -97,7 +94,7 @@ pub async fn set_bluetooth_device_name(new_name: &str) -> Result<(), zbus::Error
         &(
             "org.bluez.Adapter1",
             "Alias",
-            Value::new(new_name), // Correctly pass a zvariant::Value
+            Value::new(new_name),
         )
     ).await?;
     Ok(())
