@@ -126,11 +126,13 @@ impl BluetoothController<'_> {
         > = self.proxy.call("GetManagedObjects", &()).await?;
 
         // O(2N), but idc
-        let mut volume: u32 = 0;
+        let mut volume = 0u32;
         for (_, interfaces) in &managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaTransport1") {
                 if let Some(r_volume) = player_iface.get("Volume") {
-                    volume = r_volume.downcast_ref().expect("Not convertable for some reason!");
+                    logln!("{}", r_volume.value_signature());
+                    logln!("{}", r_volume.downcast_ref::<String>()?);
+                    // volume = r_volume.downcast_ref();
                 }
             }
         }
