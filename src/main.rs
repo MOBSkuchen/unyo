@@ -14,6 +14,7 @@ mod threads;
 mod bluetooth;
 mod color;
 mod parameters;
+mod logger;
 
 pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
     a as f32 / b as f32

@@ -1,3 +1,4 @@
+use crate::logger::_log;
 use std::sync::OnceLock;
 use lazy_static::lazy_static;
 use sdl2::EventPump;
@@ -10,6 +11,7 @@ use sdl2::surface::Surface;
 use sdl2::ttf::{Sdl2TtfContext};
 use sdl2::video::WindowContext;
 use crate::errors::{UnyoError, UnyoResult};
+use crate::logln;
 
 const _TEXT_SIZE_CONST: f64 = 32_f64 / (1080 * 40) as f64;
 
@@ -316,7 +318,7 @@ pub fn init() -> Result<(sdl2::video::Window, EventPump), String> {
     _TEXT_SIZE_MOD_GLOB.set(h as f64 * _TEXT_SIZE_CONST).expect("Failed to set global");
     sdl_context.mouse().show_cursor(false);
     
-    println!("Unyo running ({w}x{h})");
+    logln!("Unyo running ({w}x{h})");
 
     // Try forcing SDL to use KMSDRM (no X11)
     std::env::set_var("SDL_VIDEODRIVER", "KMSDRM");

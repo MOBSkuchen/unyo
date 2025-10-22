@@ -1,7 +1,7 @@
 use chrono::{Datelike, Weekday};
 use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{BLUETOOTH_DATA};
-use crate::{fraction};
+use crate::{fraction, logln};
 use crate::color::{BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
 use crate::parameters::load_device_name_or_default;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
@@ -106,6 +106,6 @@ impl Drawable for InfoWidget {
         let s = load_device_name_or_default();
         let l = s.len();
 
-        println!("{}\n{}\n{}", s, l, s.as_bytes()[l - 1]);
+        logln!("{}\n{}\n{}", s, l, s.as_bytes()[l - 1]);
     }
 }
