@@ -102,10 +102,5 @@ impl Drawable for InfoWidget {
             ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TXT_DEFAULT, uihelper);
             ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, format!("Name: {}", load_device_name_or_default()).as_str(), TXT_SUBTEXT, uihelper);
         }
-
-        let s = load_device_name_or_default();
-        let l = s.len();
-
-        logln!("{}\n{}\n{}", s, l, s.as_bytes()[l - 1]);
     }
 }
