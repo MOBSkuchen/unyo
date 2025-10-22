@@ -14,7 +14,7 @@ fn get_logfile_path() -> String {
 }
 
 pub static _LOGFILE_HANDLE: LazyLock<Mutex<File>> =
-    LazyLock::new(|| { Mutex::from(OpenOptions::new().append(true).open(get_logfile_path()).unwrap()) });
+    LazyLock::new(|| { Mutex::from(OpenOptions::new().append(true).create(true).open(get_logfile_path()).unwrap()) });
 
 #[inline]
 pub fn _log(s: &str) {
