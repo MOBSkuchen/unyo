@@ -2,7 +2,7 @@ use zbus::{Connection, Proxy};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
 use zvariant::{Dict};
-use crate::sysfiles::load_device_name_or_default;
+use crate::parameters::load_device_name_or_default;
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
@@ -92,7 +92,7 @@ pub async fn set_bluetooth_device_name(new_name: &str) -> Result<(), zbus::Error
         "org.freedesktop.DBus.Properties",
     ).await?;
 
-    adapter_proxy.call_method("SetDeviceName", &[&new_name]).await?;
+    adapter_proxy.call_method("Set", &["org.bluez.Adapter1", "Alias", new_name]).await?;
     Ok(())
 }
 

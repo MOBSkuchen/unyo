@@ -2,7 +2,7 @@ use std::thread;
 use std::time::Duration;
 use crate::api::UPDATE_WEATHER_INFO;
 use crate::bluetooth::{set_bluetooth_device_name, UPDATE_BLUETOOTH_DATA};
-use crate::sysfiles::load_device_name_or_default;
+use crate::parameters::load_device_name_or_default;
 use crate::wifi_api::refresh_wifi_connectivity;
 
 const GENERAL_UPDATE: Duration = Duration::from_secs(1);
