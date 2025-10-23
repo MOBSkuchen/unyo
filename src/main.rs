@@ -2,6 +2,7 @@ use crate::bluetooth::{set_bluetooth_device_name, BluetoothController};
 use crate::display::video_main;
 use crate::parameters::load_device_name_or_default;
 use crate::threads::{init_threads};
+use crate::utils::detect_undervoltage;
 
 mod display;
 mod ui_renderer;
@@ -15,6 +16,7 @@ mod bluetooth;
 mod color;
 mod parameters;
 mod logger;
+mod utils;
 
 pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
     a as f32 / b as f32
@@ -22,6 +24,7 @@ pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
 
 #[tokio::main]
 async fn main() {
+    detect_undervoltage();
     // Init and set Bluetooth controller
     bluetooth::_BLUETOOTH_CTL.set(BluetoothController::new().await.expect("Failed to init bt-ctl")).expect("Failed to set bt-ctl");
     init_threads();

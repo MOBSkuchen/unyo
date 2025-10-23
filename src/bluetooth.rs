@@ -2,7 +2,6 @@ use zbus::{Connection, Proxy};
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
 use zvariant::{Dict, Value};
-use crate::logln;
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
@@ -105,6 +104,27 @@ pub async fn set_bluetooth_device_name(new_name: &str) -> Result<(), zbus::Error
     Ok(())
 }
 
+pub async fn set_bluetooth(new_state: bool) -> Result<(), zbus::Error> {
+    let connection = Connection::system().await?;
+
+    let adapter_proxy = Proxy::new(
+        &connection,
+        "org.bluez",
+        "/org/bluez/hci0",
+        "org.bluez.Adapter1",
+    ).await?;
+
+    adapter_proxy.set_property("Discoverable", new_state).await?;
+    adapter_proxy.set_property("Pairable", new_state).await?;
+
+    // If disabling, disconnect all devices!
+    if !new_state {
+        // TODO: Implement
+    }
+
+    Ok(())
+}
+
 impl BluetoothController<'_> {
     pub async fn new() -> zbus::Result<Self> {
         let connection = Connection::system().await?;
@@ -153,7 +173,6 @@ impl BluetoothController<'_> {
                         if let Ok(pos) = position_value.downcast_ref::<u32>() {
                             if let Some(status_value) = player_iface.get("Status") {
                                 if let Ok(status) = status_value.downcast_ref::<String>() {
-                                    logln!("Returning that shit");
                                     return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume as u32)))
                                 }
                             }
