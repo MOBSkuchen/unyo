@@ -68,9 +68,9 @@ impl Drawable for InfoWidget {
         let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), TXT_DEFAULT, uihelper);
         let (ix, iy) = ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
 
-        // RED "!" to notify of undervoltage
+        // RED "UNDRVLT!" to notify of undervoltage
         if detect_undervoltage() {
-            ctx.draw_text(x + 3 * jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, &uihelper.font_owner.jb_large_l, "!", color_from_hex(0xFF0000), uihelper);
+            ctx.draw_text(x + 3 * jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, &uihelper.font_owner.jb_large_l, "UNDRVLT!", color_from_hex(0xFF0000), uihelper);
         }
 
         let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
