@@ -1,8 +1,9 @@
+use std::fs;
 use crate::bluetooth::{set_bluetooth_device_name, BluetoothController};
 use crate::display::video_main;
 use crate::parameters::load_device_name_or_default;
 use crate::threads::{init_threads};
-use crate::utils::detect_undervoltage;
+use crate::utils::{detect_undervoltage, DEBUG};
 
 mod display;
 mod ui_renderer;
@@ -24,7 +25,11 @@ pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
 
 #[tokio::main]
 async fn main() {
-    detect_undervoltage();
+    // Check for debug mode
+    DEBUG.set(fs::exists("/home/jasper/parameters/DEBUG").expect("Failed to check for existence of DEBUG file")).expect("Failed to init DEBUG");
+    debug!({
+        
+    });
     // Init and set Bluetooth controller
     bluetooth::_BLUETOOTH_CTL.set(BluetoothController::new().await.expect("Failed to init bt-ctl")).expect("Failed to set bt-ctl");
     init_threads();

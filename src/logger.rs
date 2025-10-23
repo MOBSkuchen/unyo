@@ -1,7 +1,9 @@
+use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::sync::{LazyLock, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
+use crate::{debug, get};
 
 #[inline]
 fn unique_stamp() -> u64 {
@@ -10,7 +12,14 @@ fn unique_stamp() -> u64 {
 
 #[inline]
 fn get_logfile_path() -> String {
-    format!("/home/jasper/logs/{}", unique_stamp())
+    // In debug mode, we only really care about one log file
+    debug!({
+        fs::remove_dir_all("/home/jasper/logs").expect("Failed to empty logs dir");
+        fs::create_dir("/home/jasper/logs").expect("Failed to create logs dir");
+        "/home/jasper/logs/DEBUG_LOG".to_string()
+    },{
+        format!("/home/jasper/logs/{}", unique_stamp())
+    })
 }
 
 pub static _LOGFILE_HANDLE: LazyLock<Mutex<File>> =
@@ -18,12 +27,12 @@ pub static _LOGFILE_HANDLE: LazyLock<Mutex<File>> =
 
 #[inline]
 pub(crate) fn _log(s: &str) {
-    (*_LOGFILE_HANDLE.lock().unwrap()).write_all(s.as_bytes()).unwrap();
+    get!(_LOGFILE_HANDLE).write_all(s.as_bytes()).unwrap();
 }
 
 #[inline]
 pub(crate) fn _log_flush() {
-    (*_LOGFILE_HANDLE.lock().unwrap()).flush().unwrap();
+    get!(_LOGFILE_HANDLE).flush().unwrap();
 }
 
 #[macro_export]

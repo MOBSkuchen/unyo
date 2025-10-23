@@ -1,3 +1,6 @@
+use std::sync::OnceLock;
+pub static DEBUG: OnceLock<bool> = OnceLock::new();
+
 // Detects an undervoltage by running `vcgencmd get_throttled`, if it returns throttled=0x0 everything is OK
 // See: https://www.raspberrypi.com/documentation/computers/os.html#vcgencmd
 #[inline]
@@ -27,5 +30,21 @@ macro_rules! get {
     // --- DEFAULT ARM ---
     ($a:expr) => {
         $a.lock().expect("Failed to open Mutex Lock")
+    };
+}
+
+#[macro_export]
+macro_rules! debug {
+    ($dbg: block) => {
+        if *get!(once $crate::utils::DEBUG) {
+            $dbg
+        }
+    };
+    ($dbg: block, $rel: block) => {
+        if *get!(once $crate::utils::DEBUG) {
+            $dbg
+        } else {
+            $rel
+        }
     };
 }
