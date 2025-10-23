@@ -48,6 +48,7 @@ pub struct PlaybackData {
     pub duration: u32,
     pub shuffle: bool,
     pub volume: u32,
+    pub name: String
 }
 
 impl PlaybackData {
@@ -57,8 +58,9 @@ impl PlaybackData {
                position: u32,
                duration: u32,
                shuffle: bool,
-               volume: u32) -> Self {
-        Self { title, artist, playback_state, position, duration, shuffle, volume }
+               volume: u32,
+               name: String) -> Self {
+        Self { title, artist, playback_state, position, duration, shuffle, volume, name }
     }
     
     pub fn line_length(&self, full: i32) -> i32 {
@@ -66,9 +68,9 @@ impl PlaybackData {
     }
 }
 
-impl From<(String, String, PlaybackState, u32, u32, bool, u32)> for PlaybackData {
-    fn from(value: (String, String, PlaybackState, u32, u32, bool, u32)) -> Self {
-        Self::new(limit_string_size(&value.0, 41), limit_string_size(&value.1, 20), value.2, value.3, value.4, value.5, value.6)
+impl From<(String, String, PlaybackState, u32, u32, bool, u32, String)> for PlaybackData {
+    fn from(value: (String, String, PlaybackState, u32, u32, bool, u32, String)) -> Self {
+        Self::new(limit_string_size(&value.0, 41), limit_string_size(&value.1, 20), value.2, value.3, value.4, value.5, value.6, value.7)
     }
 }
 
@@ -128,7 +130,7 @@ impl BluetoothController<'_> {
         Ok(Self {proxy})
     }
     
-    async fn get_data(&self) -> zbus::Result<Option<(String, String, PlaybackState, u32, u32, bool, u32)>> {
+    async fn get_data(&self) -> zbus::Result<Option<(String, String, PlaybackState, u32, u32, bool, u32, String)>> {
         let managed_objects: HashMap<
             zvariant::OwnedObjectPath,
             HashMap<String, HashMap<String, zvariant::OwnedValue>>,
@@ -143,6 +145,15 @@ impl BluetoothController<'_> {
                 }
             }
         }
+        let mut name = String::from("Device");
+        for (_, interfaces) in &managed_objects {
+            if let Some(player_iface) = interfaces.get("org.bluez.Device1") {
+                if let Some(r_volume) = player_iface.get("Alias") {
+                    name = r_volume.downcast_ref::<String>()?;
+                }
+            }
+        }
+        
         for (_, interfaces) in managed_objects {
             if let Some(player_iface) = interfaces.get("org.bluez.MediaPlayer1") {
                 
@@ -162,7 +173,7 @@ impl BluetoothController<'_> {
                         if let Ok(pos) = position_value.downcast_ref::<u32>() {
                             if let Some(status_value) = player_iface.get("Status") {
                                 if let Ok(status) = status_value.downcast_ref::<String>() {
-                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume as u32)))
+                                    return Ok(Some((title, artist, status.into(), pos, duration, shuffle, volume as u32, name)))
                                 }
                             }
                         }

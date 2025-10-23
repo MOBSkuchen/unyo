@@ -1,7 +1,8 @@
 use chrono::{Datelike, Weekday};
+use sdl2::log::log;
 use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{_BLUETOOTH_DATA};
-use crate::{fraction, get};
+use crate::{fraction, get, logln};
 use crate::color::{color_from_hex, BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
 use crate::parameters::load_device_name_or_default;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
@@ -76,6 +77,9 @@ impl Drawable for InfoWidget {
         let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
 
         if let Some(track) = &*get!(_BLUETOOTH_DATA) {
+
+            logln!("{}", track.name);
+
             let title_y = y + 2 * jb_large_l_size.one() as i32;
             let artist_y = title_y + (uihelper.font_owner.jb_medium_l.char_dim().two() as f32 * 1.5) as i32;
             let line_y = artist_y + (1.8 * EDGE_PADDING() as f32) as i32;
