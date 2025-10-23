@@ -1,10 +1,10 @@
 use sdl2::rect::Rect;
-use crate::api::{UPDATE_WEATHER_INFO, WEATHER_INFO};
+use crate::api::{UPDATE_WEATHER_INFO, _WEATHER_INFO};
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use chrono::{Datelike, Duration, Local, Timelike, Weekday};
 use crate::bluetooth::limit_string_size;
 use crate::color::{BG_SHADED, DIV_LINE, TXT_DEFAULT, TXT_SUBTEXT, TXT_WEATHER};
-use crate::fraction;
+use crate::{fraction, get};
 
 fn day_of_week_with_offset(days_offset: i64) -> String {
     let today = Local::now().date_naive();
@@ -114,7 +114,7 @@ impl Drawable for WeatherWidget {
         ctx.draw_rect(self.position, BG_SHADED);
         ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, DIV_LINE);
 
-        if let Some(weather_info) = &*WEATHER_INFO() {
+        if let Some(weather_info) = &*get!(_WEATHER_INFO) {
             let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l,
                                        format!("WETTER (in {})", limit_string_size(&weather_info.city, 9)).as_str(), TXT_DEFAULT, uihelper);
 

@@ -1,12 +1,7 @@
 use std::process::Command;
 use std::sync::{LazyLock, Mutex};
 
-static _WIFI_STRENGTH_GLOB: LazyLock<Mutex<WifiSignalBars>> = LazyLock::new(|| {Mutex::from(WifiSignalBars::NoSignal)});
-
-#[allow(non_snake_case)]
-pub fn WIFI_STRENGTH() -> WifiSignalBars {
-    *_WIFI_STRENGTH_GLOB.lock().unwrap()
-}
+pub static _WIFI_STRENGTH_GLOB: LazyLock<Mutex<WifiSignalBars>> = LazyLock::new(|| {Mutex::from(WifiSignalBars::NoSignal)});
 
 #[derive(Debug, Clone, Copy)]
 pub enum WifiSignalBars {
@@ -50,7 +45,7 @@ fn signal_to_bars(signal: u32) -> WifiSignalBars {
     }
 }
 
-fn get_wifi_signal_bars() -> Option<WifiSignalBars> {
+pub fn get_wifi_signal_bars() -> Option<WifiSignalBars> {
     let output = Command::new("nmcli")
         .args(["-t", "-f", "ACTIVE,SIGNAL", "dev", "wifi"])
         .output()
@@ -69,8 +64,4 @@ fn get_wifi_signal_bars() -> Option<WifiSignalBars> {
     }
 
     None
-}
-
-pub fn refresh_wifi_connectivity() {
-    *_WIFI_STRENGTH_GLOB.lock().unwrap() = get_wifi_signal_bars().unwrap_or(WifiSignalBars::NoSignal);
 }

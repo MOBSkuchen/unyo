@@ -1,37 +1,48 @@
-use std::sync::{LazyLock, Mutex, MutexGuard};
+use std::io;
+use std::sync::{LazyLock, Mutex};
 use lazy_static::lazy_static;
 use geolocation::Locator;
 use isahc::ReadResponseExt;
 use serde_json::Value;
 use crate::errors::{UnyoError, UnyoResult};
+use crate::logln;
 use crate::weather_widget::{time_with_hour_offset};
 
-static _WEATHER_INFO: LazyLock<Mutex<Option<WeatherInfo>>> = LazyLock::new(|| {Mutex::from(None)});
+pub static _WEATHER_INFO: LazyLock<Mutex<Option<WeatherInfo>>> = LazyLock::new(|| {Mutex::from(None)});
 
 #[allow(non_snake_case)]
-pub fn WEATHER_INFO<'a>() -> MutexGuard<'a, Option<WeatherInfo>> {
-    _WEATHER_INFO.lock().unwrap()
-}
-
-#[allow(non_snake_case)]
+#[inline]
 pub fn UPDATE_WEATHER_INFO() {
-    let info = WeatherInfo::from_json(make_api_request());
-    *_WEATHER_INFO.lock().unwrap() = Some(info);
+    *_WEATHER_INFO.lock().unwrap() = Some(WeatherInfo::from_json(make_api_request()));
 }
 
 lazy_static! {
-    pub static ref LOCATION: Locator = {
-        get_location().expect("Failed to get geo location")
-    };
+    pub static ref LOCATION: Locator = safe_geo_location_getter();
 }
 
-fn get_location() -> Option<Locator> {
-    for a in get_if_addrs::get_if_addrs().unwrap() {
+// Tries to get the geolocation 3 times and then quits
+fn safe_geo_location_getter() -> Locator {
+    for i in 1..3 {
+        let x = get_location();
+        if let Ok(Some(l)) = x {
+            return l
+        } else if x.is_err() {
+            logln!("Error while trying to get geoloc: Service not available ({i}/3)");
+        } else {
+            logln!("Error while trying to get geoloc: No Wifi! ({i}/3)");
+        }
+    };
+    logln!("geoloc tries expended; quitting with code 20");
+    std::process::exit(20)
+}
+
+fn get_location() -> Result<Option<Locator>, io::Error> {
+    for a in get_if_addrs::get_if_addrs()? {
         if a.ip().is_ipv6() && a.name == "wlan0" {
-            return Some(geolocation::find(a.ip().to_string().as_str()).expect("Failed to get GEOLOC"));
+            return Ok(Some(geolocation::find(a.ip().to_string().as_str())?));
         }
     }
-    None
+    Ok(None)
 }
 
 fn api_req(uri: String) -> UnyoResult<Value> {

@@ -1,13 +1,12 @@
 use chrono::{Datelike, Weekday};
-use sdl2::log::log;
 use sdl2::rect::{Point, Rect};
-use crate::bluetooth::{BLUETOOTH_DATA};
-use crate::{fraction, logln};
+use crate::bluetooth::{_BLUETOOTH_DATA};
+use crate::{fraction, get};
 use crate::color::{color_from_hex, BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
 use crate::parameters::load_device_name_or_default;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use crate::utils::detect_undervoltage;
-use crate::wifi_api::WIFI_STRENGTH;
+use crate::wifi_api::{_WIFI_STRENGTH_GLOB};
 
 pub struct InfoWidget {
     position: Rect
@@ -58,7 +57,7 @@ impl InfoWidget {
 
 impl Drawable for InfoWidget {
     fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper) {
-        let path = WIFI_STRENGTH().to_path();
+        let path = get!(_WIFI_STRENGTH_GLOB).to_path();
         let xp = self.position.x + 2 * EDGE_PADDING();
         let jb_large_l_size = uihelper.font_owner.jb_large_l.char_dim();
         
@@ -75,8 +74,8 @@ impl Drawable for InfoWidget {
         }
 
         let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
-        
-        if let Some(track) = &*BLUETOOTH_DATA() {
+
+        if let Some(track) = &*get!(_BLUETOOTH_DATA) {
             let title_y = y + 2 * jb_large_l_size.one() as i32;
             let artist_y = title_y + (uihelper.font_owner.jb_medium_l.char_dim().two() as f32 * 1.5) as i32;
             let line_y = artist_y + (1.8 * EDGE_PADDING() as f32) as i32;
@@ -91,11 +90,11 @@ impl Drawable for InfoWidget {
             let delta_artist = artist_bounds - size_of_artist_text;
 
             // Title
-            ctx.draw_text(xp + delta_title / 2, title_y, &uihelper.font_owner.jb_medium_l, track.title.as_str(), TXT_DEFAULT, &uihelper);
+            ctx.draw_text(xp + delta_title / 2, title_y, &uihelper.font_owner.jb_medium_l, track.title.as_str(), TXT_DEFAULT, uihelper);
             // Artist
-            ctx.draw_text(xp + delta_artist / 2, artist_y, &uihelper.font_owner.jb_medium_m, track.artist.as_str(), TXT_SUBTEXT, &uihelper);
+            ctx.draw_text(xp + delta_artist / 2, artist_y, &uihelper.font_owner.jb_medium_m, track.artist.as_str(), TXT_SUBTEXT, uihelper);
             // Position
-            let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.position / 1000), TXT_SUBTEXT, &uihelper);
+            let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.position / 1000), TXT_SUBTEXT, uihelper);
             // Line
             let ls = 5 * EDGE_PADDING();
             let line_end = x + 31 * EDGE_PADDING();

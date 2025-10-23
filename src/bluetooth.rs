@@ -1,22 +1,11 @@
 use zbus::{Connection, Proxy};
 use std::collections::HashMap;
-use std::sync::{LazyLock, Mutex, MutexGuard, OnceLock};
+use std::sync::{LazyLock, Mutex, OnceLock};
 use zvariant::{Dict, Value};
 
 pub static _BLUETOOTH_CTL: OnceLock<BluetoothController> = OnceLock::new();
 pub static _BLUETOOTH_DATA: LazyLock<Mutex<Option<PlaybackData>>> =
     LazyLock::new(|| {Mutex::new(None)});
-
-#[allow(non_snake_case)]
-pub async fn UPDATE_BLUETOOTH_DATA() {
-    let data = _BLUETOOTH_CTL.get().unwrap().poll().await;
-    *_BLUETOOTH_DATA.lock().unwrap() = data;
-}
-
-#[allow(non_snake_case)]
-pub fn BLUETOOTH_DATA<'a>() -> MutexGuard<'a, Option<PlaybackData>> {
-    _BLUETOOTH_DATA.lock().unwrap()
-}
 
 #[derive(Debug)]
 pub struct BluetoothController<'a> {
