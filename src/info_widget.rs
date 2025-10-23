@@ -116,8 +116,8 @@ impl Drawable for InfoWidget {
 
             // Tile 2
 
-            let (x, y) = ctx.draw_text(self.position2.x + 2 * IOTA(), self.position2.y + IOTA(), &uihelper.font_owner.jb_medium_l, "Verbindung", TXT_DEFAULT, uihelper);
-            ctx.draw_text(self.position2.x + 2 * IOTA(), y + 2 * (uihelper.font_owner.jb_medium_l.char_dim().two() as i32), &uihelper.font_owner.jb_medium_l, format!("Gerät: {}", track.name).as_str(), TXT_DEFAULT, uihelper);
+            let (_, y) = ctx.draw_text(self.position2.x + 2 * IOTA(), self.position2.y + IOTA(), &uihelper.font_owner.jb_medium_l, "Verbindung", TXT_DEFAULT, uihelper);
+            ctx.draw_text(self.position2.x + 2 * IOTA(), y + (uihelper.font_owner.jb_medium_l.char_dim().two() as i32), &uihelper.font_owner.jb_medium_l_u, format!("Gerät: {}", track.name).as_str(), TXT_DEFAULT, uihelper);
         } else {
             ctx.draw_text(xp + 5 * IOTA(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TXT_DEFAULT, uihelper);
             ctx.draw_text(xp + 5 * IOTA(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, format!("Name: {}", load_device_name_or_default()).as_str(), TXT_SUBTEXT, uihelper);

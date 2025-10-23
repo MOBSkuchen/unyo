@@ -7,7 +7,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::{Texture, TextureCreator, WindowCanvas};
 use sdl2::surface::Surface;
-use sdl2::ttf::{Sdl2TtfContext};
+use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::video::WindowContext;
 use crate::errors::{UnyoError, UnyoResult};
 use crate::{get, logln};
@@ -182,6 +182,7 @@ impl<'a> From<sdl2::ttf::Font<'a, 'a>> for Font<'a> {
 
 pub struct FontOwner<'a> {
     pub jb_medium_l: Font<'a>,
+    pub jb_medium_l_u: Font<'a>,
     pub jb_medium_m: Font<'a>,
     pub jb_medium_s: Font<'a>,
     pub jb_large_l: Font<'a>,
@@ -191,13 +192,14 @@ pub struct FontOwner<'a> {
 impl<'a> FontOwner<'a> {
     pub fn new() -> Self {
         let jb_medium_l = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumL.to_real_size());
+        let mut jb_medium_l_u = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumL.to_real_size()); jb_medium_l_u.0.set_style(FontStyle::UNDERLINE);
         let jb_medium_m = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumM.to_real_size());
         let jb_medium_s = Font::load(AvailableFonts::JetbrainsMono, FontSize::MediumS.to_real_size());
 
         let jb_large_l = Font::load(AvailableFonts::JetbrainsMono, FontSize::LargeL.to_real_size());
         let jb_large_s = Font::load(AvailableFonts::JetbrainsMono, FontSize::LargeS.to_real_size());
 
-        Self {jb_medium_l, jb_medium_m, jb_medium_s, jb_large_l, jb_large_s}
+        Self {jb_medium_l, jb_medium_l_u, jb_medium_m, jb_medium_s, jb_large_l, jb_large_s}
     }
 }
 
