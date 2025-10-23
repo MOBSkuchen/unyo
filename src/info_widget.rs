@@ -27,7 +27,7 @@ impl InfoWidget {
         // position2.0 -= IOTA() as u32;
         Self {
             position1,
-            position2: screen_size.scale_1_2(fraction(4, 9), 0.5).modify(-IOTA(), -IOTA()).to_rect(position1.x + position1.w, IOTA())
+            position2: screen_size.scale_1_2(fraction(4, 9), 0.5).modify(-2 * IOTA(), -2 * IOTA()).to_rect(position1.x + position1.w, IOTA())
         }
     }
     
