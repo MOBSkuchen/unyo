@@ -3,7 +3,7 @@ use sdl2::log::log;
 use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{BLUETOOTH_DATA};
 use crate::{fraction, logln};
-use crate::color::{BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
+use crate::color::{color_from_hex, BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
 use crate::parameters::load_device_name_or_default;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use crate::wifi_api::WIFI_STRENGTH;
@@ -66,7 +66,11 @@ impl Drawable for InfoWidget {
         ctx.draw_rect(self.position, BG_SHADED);
 
         let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), TXT_DEFAULT, uihelper);
-        ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
+        let (ix, iy) = ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
+
+        // RED "!"
+        ctx.draw_text(ix + jb_large_l_size.two() as i32, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_l, "!", color_from_hex(0xFF0000), uihelper);
+        
         let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
         
         if let Some(track) = &*BLUETOOTH_DATA() {
