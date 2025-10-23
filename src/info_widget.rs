@@ -1,16 +1,16 @@
 use chrono::{Datelike, Weekday};
-use sdl2::log::log;
 use sdl2::rect::{Point, Rect};
 use crate::bluetooth::{_BLUETOOTH_DATA};
-use crate::{fraction, get, logln};
-use crate::color::{color_from_hex, BG_SHADED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
+use crate::{fraction, get};
+use crate::color::{color_from_hex, BG_SHADED, BG_TINTED, PB_EMPTY, PB_FULLY, TXT_DEFAULT, TXT_SUBTEXT};
 use crate::parameters::load_device_name_or_default;
 use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
 use crate::utils::detect_undervoltage;
 use crate::wifi_api::{_WIFI_STRENGTH_GLOB};
 
 pub struct InfoWidget {
-    position: Rect
+    position1: Rect,
+    position2: Rect
 }
 
 fn format_time(seconds: u32) -> String {
@@ -22,7 +22,11 @@ fn format_time(seconds: u32) -> String {
 
 impl InfoWidget {
     pub fn new(screen_size: &USize) -> Self {
-        Self { position: screen_size.scale_1_2(fraction(5, 9), 0.5).to_rect(EDGE_PADDING(), EDGE_PADDING()) }
+        let position1 = screen_size.scale_1_2(fraction(5, 9), 0.5).to_rect(EDGE_PADDING(), EDGE_PADDING());
+        Self {
+            position1,
+            position2: screen_size.scale_1_2(fraction(4, 9), fraction(4, 9)).to_rect(position1.x + position1.w, EDGE_PADDING())
+        }
     }
     
     fn get_time_strs() -> (String, String) {
@@ -59,15 +63,16 @@ impl InfoWidget {
 impl Drawable for InfoWidget {
     fn draw(&self, ctx: &mut UIContext, uihelper: &UIHelper) {
         let path = get!(_WIFI_STRENGTH_GLOB).to_path();
-        let xp = self.position.x + 2 * EDGE_PADDING();
+        let xp = self.position1.x + 2 * EDGE_PADDING();
         let jb_large_l_size = uihelper.font_owner.jb_large_l.char_dim();
         
         let (date, time) = Self::get_time_strs();
         
-        ctx.draw_rect(self.position, BG_SHADED);
+        ctx.draw_rect(self.position1, BG_SHADED);
+        ctx.draw_rect(self.position2, BG_TINTED);
 
-        let (x, y) = ctx.draw_text(xp, self.position.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), TXT_DEFAULT, uihelper);
-        let (ix, iy) = ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
+        let (x, y) = ctx.draw_text(xp, self.position1.y + 2 * EDGE_PADDING(), &uihelper.font_owner.jb_large_l, time.as_str(), TXT_DEFAULT, uihelper);
+        ctx.draw_image(x + jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, jb_large_l_size.scale_1(2f32).into(), path.as_str(), uihelper);
 
         // RED "UNDRVLT!" to notify of undervoltage
         if detect_undervoltage() {
@@ -77,15 +82,12 @@ impl Drawable for InfoWidget {
         let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
 
         if let Some(track) = &*get!(_BLUETOOTH_DATA) {
-
-            logln!("{}", track.name);
-
             let title_y = y + 2 * jb_large_l_size.one() as i32;
             let artist_y = title_y + (uihelper.font_owner.jb_medium_l.char_dim().two() as f32 * 1.5) as i32;
             let line_y = artist_y + (1.8 * EDGE_PADDING() as f32) as i32;
             
-            let title_bounds = self.position.w - EDGE_PADDING() * 4 - xp;
-            let artist_bounds = self.position.w / 2 - 3 * xp;
+            let title_bounds = self.position1.w - EDGE_PADDING() * 4 - xp;
+            let artist_bounds = self.position1.w / 2 - 3 * xp;
             
             let size_of_title_text= uihelper.font_owner.jb_medium_l.size_of_text(track.title.as_str()).one() as i32;
             let size_of_artist_text= uihelper.font_owner.jb_medium_m.size_of_text(track.artist.as_str()).one() as i32;
@@ -100,15 +102,15 @@ impl Drawable for InfoWidget {
             // Position
             let (x, _) = ctx.draw_text(artist_bounds + EDGE_PADDING(), artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.position / 1000), TXT_SUBTEXT, uihelper);
             // Line
-            let ls = 5 * EDGE_PADDING();
-            let line_end = x + 31 * EDGE_PADDING();
-            let length = track.line_length(line_end - x - ls);
-            ctx.draw_line(Point::new(x + ls, line_y), Point::new(line_end, line_y), EDGE_PADDING(), PB_EMPTY);
+            let line_start = 5 * EDGE_PADDING();
+            let line_end = x + 40 * EDGE_PADDING();
+            let length = track.line_length(line_end - x - line_start);
+            ctx.draw_line(Point::new(x + line_start, line_y), Point::new(line_end, line_y), EDGE_PADDING(), PB_EMPTY);
             if length != 0 {
-                ctx.draw_line(Point::new(x + ls, line_y), Point::new(x + ls + length, line_y), EDGE_PADDING(), PB_FULLY);
+                ctx.draw_line(Point::new(x + line_start, line_y), Point::new(x + line_start + length, line_y), EDGE_PADDING(), PB_FULLY);
             }
             // Duration
-            ctx.draw_text(line_end + ls, artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.duration / 1000), TXT_SUBTEXT, uihelper);
+            ctx.draw_text(line_end + line_start, artist_y, &uihelper.font_owner.jb_medium_m, &format_time(track.duration / 1000), TXT_SUBTEXT, uihelper);
         } else {
             ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, "Suche nach geräten...", TXT_DEFAULT, uihelper);
             ctx.draw_text(xp + 5 * EDGE_PADDING(), y + 3 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_medium_l, format!("Name: {}", load_device_name_or_default()).as_str(), TXT_SUBTEXT, uihelper);
