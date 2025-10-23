@@ -5,7 +5,7 @@ pub static DEBUG: OnceLock<bool> = OnceLock::new();
 // See: https://www.raspberrypi.com/documentation/computers/os.html#vcgencmd
 #[inline]
 pub fn detect_undervoltage() -> bool {
-    std::process::Command::new("vcgencmd").arg("get_throttled").output().map(|t| t.stdout == b"throttled=0x0\n").unwrap_or(false)
+    std::process::Command::new("vcgencmd").arg("get_throttled").output().map(|t| t.stdout != b"throttled=0x0\n").unwrap_or(false)
 }
 
 #[macro_export]
