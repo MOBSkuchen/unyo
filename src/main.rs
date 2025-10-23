@@ -27,9 +27,6 @@ pub(crate) const fn fraction(a: i32, b: i32) -> f32 {
 async fn main() {
     // Check for debug mode
     DEBUG.set(fs::exists("/home/jasper/parameters/DEBUG").expect("Failed to check for existence of DEBUG file")).expect("Failed to init DEBUG");
-    debug!({
-        
-    });
     // Init and set Bluetooth controller
     bluetooth::_BLUETOOTH_CTL.set(BluetoothController::new().await.expect("Failed to init bt-ctl")).expect("Failed to set bt-ctl");
     init_threads();

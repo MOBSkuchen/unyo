@@ -325,7 +325,7 @@ pub fn init() -> Result<(sdl2::video::Window, EventPump), String> {
 
     let window = video_subsystem
         .window("unyo", w, h)
-        .vulkan()
+        .opengl()
         .build()
         .map_err(|e| e.to_string())?;
     
