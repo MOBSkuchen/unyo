@@ -104,7 +104,7 @@ impl USize {
 
     #[inline]
     pub fn modify(&self, s1: i32, s2: i32) -> USize {
-        USize(((self.0.0 as i32 + s1) as u32, (self.0.1 as i32 * s2) as u32))
+        USize(((self.0.0 as i32 + s1) as u32, (self.0.1 as i32 + s2) as u32))
     }
 }
 
