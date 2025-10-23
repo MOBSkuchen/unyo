@@ -23,9 +23,11 @@ fn format_time(seconds: u32) -> String {
 impl InfoWidget {
     pub fn new(screen_size: &USize) -> Self {
         let position1 = screen_size.scale_1_2(fraction(5, 9), 0.5).to_rect(IOTA(), IOTA());
+        // let mut position2 = screen_size.scale_1_2(fraction(4, 9), 0.5);
+        // position2.0 -= IOTA() as u32;
         Self {
             position1,
-            position2: screen_size.scale_1_2(fraction(4, 9), 0.5).to_rect(position1.x + position1.w, IOTA())
+            position2: screen_size.scale_1_2(fraction(4, 9), 0.5).modify(-IOTA(), -IOTA()).to_rect(position1.x + position1.w, IOTA())
         }
     }
     
