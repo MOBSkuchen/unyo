@@ -1,6 +1,6 @@
 use sdl2::rect::Rect;
 use crate::api::{UPDATE_WEATHER_INFO, _WEATHER_INFO};
-use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, EDGE_PADDING};
+use crate::ui_renderer::{Drawable, UIContext, UIHelper, USize, IOTA};
 use chrono::{Datelike, Duration, Local, Timelike, Weekday};
 use crate::bluetooth::limit_string_size;
 use crate::color::{BG_SHADED, DIV_LINE, TXT_DEFAULT, TXT_SUBTEXT, TXT_WEATHER};
@@ -74,7 +74,7 @@ pub struct WeatherWidget {
 
 impl WeatherWidget {
     pub fn new(w_size: &USize) -> Self {
-        let position = w_size.scale_1_2(fraction(5, 9), 0.5).to_rect(EDGE_PADDING(), (w_size.two() / 2) as i32 - EDGE_PADDING());
+        let position = w_size.scale_1_2(fraction(5, 9), 0.5).to_rect(IOTA(), (w_size.two() / 2) as i32 - IOTA());
         Self {position}
     }
     
@@ -112,10 +112,10 @@ impl Drawable for WeatherWidget {
         let medium_s_char_size = uihelper.font_owner.jb_medium_s.char_dim();
 
         ctx.draw_rect(self.position, BG_SHADED);
-        ctx.draw_line(self.position.top_right(), self.position.top_left(), EDGE_PADDING() / 2, DIV_LINE);
+        ctx.draw_line(self.position.top_right(), self.position.top_left(), IOTA() / 2, DIV_LINE);
 
         if let Some(weather_info) = &*get!(_WEATHER_INFO) {
-            let (x, y) = ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l,
+            let (x, y) = ctx.draw_text(self.position.x + IOTA(), self.position.y + IOTA(), &uihelper.font_owner.jb_medium_l,
                                        format!("WETTER (in {})", limit_string_size(&weather_info.city, 9)).as_str(), TXT_DEFAULT, uihelper);
 
             let w_current_p = self.select_image_for_params(weather_info.current.1, Some(weather_info.current.2), None, Some(weather_info.is_day));
@@ -123,36 +123,36 @@ impl Drawable for WeatherWidget {
                                        format!("Aktuell: {} °C", weather_info.current.0).as_str(), TXT_SUBTEXT, uihelper);
             ctx.draw_image(x + (medium_l_char_size.one() * 3) as i32, y, medium_l_char_size.scale_1(2.5).into(), w_current_p.to_path(), uihelper);
 
-            let (mut x, mut y) = (self.position.x + EDGE_PADDING(), y + 40 * EDGE_PADDING());
+            let (mut x, mut y) = (self.position.x + IOTA(), y + 40 * IOTA());
             let day_img_size = medium_s_char_size.scale_1_2(3f32, 1.8).into();
             let hour_img_size = medium_m_char_size.scale_1_2(3.5, 2f32).into();
 
             for (day, data) in weather_info.daily.iter().enumerate() {
                 let name = day_of_week_with_offset(day as i64);
 
-                let xp = x + EDGE_PADDING() * 8 * (day != 0) as i32;    // Bounding position for item
+                let xp = x + IOTA() * 8 * (day != 0) as i32;    // Bounding position for item
 
                 let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_l, name.as_str(), TXT_WEATHER, uihelper);
                 x = rebound.0;
                 y = rebound.1;
 
                 let img = self.select_image_for_params(data.2, None, Some(data.3), None);
-                ctx.draw_image(x + 2 * EDGE_PADDING(), y + EDGE_PADDING(), day_img_size, img.to_path(), uihelper);
+                ctx.draw_image(x + 2 * IOTA(), y + IOTA(), day_img_size, img.to_path(), uihelper);
 
-                ctx.draw_text(xp, y + 3 * EDGE_PADDING() + medium_s_char_size.two() as i32, &uihelper.font_owner.jb_medium_s, add_degree(data.0).as_str(), TXT_WEATHER, uihelper);
+                ctx.draw_text(xp, y + 3 * IOTA() + medium_s_char_size.two() as i32, &uihelper.font_owner.jb_medium_s, add_degree(data.0).as_str(), TXT_WEATHER, uihelper);
             }
 
-            y = self.position.y + 15 * EDGE_PADDING();
-            x = self.position.x + 5 * EDGE_PADDING();
+            y = self.position.y + 15 * IOTA();
+            x = self.position.x + 5 * IOTA();
 
             for (hour, data) in weather_info.hourly.iter().enumerate() {
                 let dstr = add_degree(data.0);
                 let name = time_with_hour_offset(hour as i64);
 
-                let xp = x + EDGE_PADDING() * 6 * (hour != 0) as i32;
+                let xp = x + IOTA() * 6 * (hour != 0) as i32;
 
                 let rebound = ctx.draw_text(xp, y, &uihelper.font_owner.jb_medium_l, name.as_str(), TXT_WEATHER, uihelper);
-                x = rebound.0 + 3 * EDGE_PADDING();
+                x = rebound.0 + 3 * IOTA();
                 y = rebound.1;
 
                 // Center text, add a full char to the right if there is no comma/point, add 0.3 if there is
@@ -168,7 +168,7 @@ impl Drawable for WeatherWidget {
             }
         } else {
             // NO WEATHER DATA
-            ctx.draw_text(self.position.x + EDGE_PADDING(), self.position.y + EDGE_PADDING(), &uihelper.font_owner.jb_medium_l, "WETTER fehlt gerade", TXT_DEFAULT, uihelper);
+            ctx.draw_text(self.position.x + IOTA(), self.position.y + IOTA(), &uihelper.font_owner.jb_medium_l, "WETTER fehlt gerade", TXT_DEFAULT, uihelper);
             // Update data
             UPDATE_WEATHER_INFO();
         }

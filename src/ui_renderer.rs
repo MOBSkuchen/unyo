@@ -1,4 +1,3 @@
-use crate::logger::_log;
 use std::sync::OnceLock;
 use lazy_static::lazy_static;
 use sdl2::EventPump;
@@ -11,11 +10,11 @@ use sdl2::surface::Surface;
 use sdl2::ttf::{Sdl2TtfContext};
 use sdl2::video::WindowContext;
 use crate::errors::{UnyoError, UnyoResult};
-use crate::logln;
+use crate::{get, logln};
 
 const _TEXT_SIZE_CONST: f64 = 32_f64 / (1080 * 40) as f64;
 
-pub static _EDGE_PADDING_GLOB: OnceLock<i32> = OnceLock::new();
+pub static _IOTA_SIZE_GLOB: OnceLock<i32> = OnceLock::new();
 pub static _TEXT_SIZE_MOD_GLOB: OnceLock<f64> = OnceLock::new();
 
 pub fn get_custom_font_size(s: f64) -> u16 {
@@ -46,9 +45,10 @@ impl FontSize {
 }
 
 #[allow(non_snake_case)]
+#[inline]
 // 10px on a Full-HD screen
-pub fn EDGE_PADDING() -> i32 {
-    *_EDGE_PADDING_GLOB.get().unwrap()
+pub fn IOTA() -> i32 {
+    *get!(once _IOTA_SIZE_GLOB)
 }
 
 const FNT_PTH_ROBOTO: &str = "/home/jasper/res/Roboto-Medium.ttf";
@@ -314,7 +314,7 @@ pub fn init() -> Result<(sdl2::video::Window, EventPump), String> {
     // Currently only needs PNG, maybe add JPG support?
     let _image_context = sdl2::image::init(InitFlag::PNG)?;
     let (w, h) = video_subsystem.display_bounds(0).expect("Display not found!!").size();
-    _EDGE_PADDING_GLOB.set((h / 108) as i32).expect("Failed to set global");
+    _IOTA_SIZE_GLOB.set((h / 108) as i32).expect("Failed to set global");
     _TEXT_SIZE_MOD_GLOB.set(h as f64 * _TEXT_SIZE_CONST).expect("Failed to set global");
     sdl_context.mouse().show_cursor(false);
     
