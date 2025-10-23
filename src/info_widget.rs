@@ -70,7 +70,7 @@ impl Drawable for InfoWidget {
 
         // RED "!" to notify of undervoltage
         if detect_undervoltage() {
-            ctx.draw_text(ix + (jb_large_l_size.two() / 2) as i32, iy - (jb_large_l_size.two() / 7) as i32, &uihelper.font_owner.jb_large_l, "!", color_from_hex(0xFF0000), uihelper);
+            ctx.draw_text(x + 3 * jb_large_l_size.one() as i32, y - (jb_large_l_size.two() / 7) as i32, &uihelper.font_owner.jb_large_l, "!", color_from_hex(0xFF0000), uihelper);
         }
 
         let (_, y) = ctx.draw_text(xp, y + 2 * jb_large_l_size.one() as i32, &uihelper.font_owner.jb_large_s, date.as_str(), TXT_SUBTEXT, uihelper);
